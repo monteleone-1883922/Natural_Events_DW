@@ -11,14 +11,52 @@ def print_progress_bar(percentuale, lunghezza_barra=20):
 
 # 1. URL dell'API REST
 URL_VOLCANO = 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanoes/{id}/info'
+URL_COUNTIES = 'https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-united-states-of-america-county/records'
 URLS = {'tsunami': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/events',
         'earthquake': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes',
         'volcano': 'https://volcano.si.edu/database/list_volcano_holocene_excel.cfm',
         'eruption': 'https://volcano.si.edu/database/GVP_Eruption_Search_Result.xlsx',
-        'tornado': 'https://www.spc.noaa.gov/wcm/data/1950-2024_all_tornadoes.csv'
+        'tornado': 'https://www.spc.noaa.gov/wcm/data/1950-2024_all_tornadoes.csv',
         }
 BASE_DATA_PATH = "../data/"
+COUNTIES_FILE = BASE_DATA_PATH + "counties.csv"
 # Parametri della query
+
+def build_county_json(county_raw):
+    if len(county_raw['ste_code']) != 1 or len(county_raw['coty_code']) != 1 or len(county_raw['coty_name_long']) != 1 \
+            or len(county_raw['coty_name']) != 1 or len(county_raw['ste_name']) != 1:
+        raise Exception('invalid county format')
+    return {
+        "state_FIPS": int(county_raw['ste_code'][0]),
+        "state_name": county_raw['ste_name'][0],
+        "county_code": int(county_raw['coty_code'][0]),
+        "county_name": county_raw['coty_name'][0],
+        "area": county_raw['coty_area_code'],
+        "county_type": county_raw['coty_type'],
+        "county_FIPS": int(county_raw['coty_fp_code']),
+        "county_gnis_code": int(county_raw['coty_gnis_code']),
+        "county_full_name": county_raw['coty_name_long'][0]
+    }
+
+def retrieve_counties():
+    num_counties = 100000
+    i = 0
+    counties = []
+    while i < num_counties:
+        print_progress_bar(i/num_counties)
+        params = {
+            'limit': 100,
+            'offset': i
+        }
+        response = requests.get(URL_COUNTIES, params=params)
+        data = response.json()
+        num_counties = data['total_count']
+        counties += [build_county_json(county_raw) for county_raw in data['results']]
+        i += 100
+    print("\ncounties: ", len(counties))
+    df = pl.DataFrame(counties)
+    del data, response, counties
+    df.write_csv(COUNTIES_FILE)
 
 def retrieve_data(url, output_file):
     num_pages = 100000
@@ -93,14 +131,15 @@ def retrieve_data_simple(url, filename):
     print(f"File saved: {filename}")
     if url_idx == 'tornado':
         fix_tornado_ids(filename)
+        retrieve_counties()
 
 
 def fix_tornado_ids(filename):
     df = pl.read_csv(filename)
 
-    # Aggiungi colonna ID sequenziale (partendo da 1)
+
     df = df.with_columns(
-        pl.int_range(1, pl.count() + 1, eager=False).alias("id")
+        (pl.col("yr").cast(pl.Utf8) + pl.col("om").cast(pl.Utf8)).cast(pl.Int64).alias("id")
     )
     df.write_csv(filename)
     print(f"added  id column to file: {filename}")
