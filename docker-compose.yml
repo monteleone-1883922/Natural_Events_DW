@@ -16,6 +16,8 @@ services:
       NEO4J_dbms_connector_bolt_advertised__address: localhost:7687
     volumes:
       - ./data:/var/lib/neo4j/import
+      - ./data:/var/lib/neo4j/data
+
     healthcheck:
       test: [ "CMD", "cypher-shell", "-u", "neo4j", "-p", "password1234", "RETURN 1" ]
       interval: 15s
@@ -32,6 +34,10 @@ services:
       - ./data:/var/lib/neo4j/import
     entrypoint: >
       bash -c "
+        if [ -f /init/.seed_done ]; then
+          echo 'Seed already done. Skipping.';
+          exit 0;
+        fi
         until cypher-shell -a bolt://neo4j:7687 -u neo4j -p password1234 'RETURN 1'; do
           echo 'Waiting for Neo4j to be ready...';
           sleep 3;
@@ -45,4 +51,5 @@ services:
         echo 'Creating new links to Counties';
         cypher-shell -a bolt://neo4j:7687 -u neo4j -p password1234 -f /init/create_links_counties.cypher;
         echo 'Finished seeding the database.';
+        touch /init/.seed_done;
       "
