@@ -34,18 +34,29 @@ CREATE (t:Tornado {id: toInteger(row.id),
             width: toInteger(row.wid),
             alteredMagnitude: toInteger(row.fc)
 })
+WITH t, row, f1, f2, f3, f4
 // link to State
-MERGE (t)-[:IN_STATE]->(:State {fips_code: toInteger(row.stf)})
+MATCH (s:State {fips_code: toInteger(row.stf)})
+MERGE (t)-[:IN_STATE]->(s)
 // link to counties
+WITH t, row, f1, f2, f3, f4, s
+OPTIONAL MATCH (c1:County {fips_code: f1})-[:IN_STATE]->(s)
+WITH t, row, f1, f2, f3, f4, s, c1
 FOREACH (_ IN CASE WHEN f1 > 0 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 1}]->(:County {fips_code: f1})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 1}]->(c1)
 )
+WITH t, row, f1, f2, f3, f4, s
+OPTIONAL MATCH (c2:County {fips_code: f2})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f2 > 0 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 2}]->(:County {fips_code: f2})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 2}]->(c2)
 )
+WITH t, row, f1, f2, f3, f4, s
+OPTIONAL MATCH (c3:County {fips_code: f3})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f3 > 0 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 3}]->(:County {fips_code: f3})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 3}]->(c3)
 )
+WITH t, row, f1, f2, f3, f4, s
+OPTIONAL MATCH (c4:County {fips_code: f4})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f4 > 0 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 4}]->(:County {fips_code: f4})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 4}]->(c4)
 );

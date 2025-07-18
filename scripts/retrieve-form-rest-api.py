@@ -1,3 +1,4 @@
+import os
 import sys
 
 import requests
@@ -11,7 +12,7 @@ def print_progress_bar(percentuale, lunghezza_barra=20):
 
 # 1. URL dell'API REST
 URL_VOLCANO = 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanoes/{id}/info'
-URL_COUNTIES = 'https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-united-states-of-america-county/records'
+URL_COUNTIES = 'https://www.spc.noaa.gov/wcm/stnindex_all.txt'
 URLS = {'tsunami': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/events',
         'earthquake': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes',
         'volcano': 'https://volcano.si.edu/database/list_volcano_holocene_excel.cfm',
@@ -19,7 +20,11 @@ URLS = {'tsunami': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunam
         'tornado': 'https://www.spc.noaa.gov/wcm/data/1950-2024_all_tornadoes.csv',
         }
 BASE_DATA_PATH = "../data/"
-COUNTIES_FILE = BASE_DATA_PATH + "counties.csv"
+COUNTIES_FILE_TXT = BASE_DATA_PATH + "counties.txt"
+COUNTIES_FILE_CSV = BASE_DATA_PATH + "counties.csv"
+HEADERS_COUNTIES = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
 # Parametri della query
 
 def build_county_json(county_raw):
@@ -39,24 +44,83 @@ def build_county_json(county_raw):
     }
 
 def retrieve_counties():
-    num_counties = 100000
-    i = 0
-    counties = []
-    while i < num_counties:
-        print_progress_bar(i/num_counties)
-        params = {
-            'limit': 100,
-            'offset': i
-        }
-        response = requests.get(URL_COUNTIES, params=params)
-        data = response.json()
-        num_counties = data['total_count']
-        counties += [build_county_json(county_raw) for county_raw in data['results']]
-        i += 100
-    print("\ncounties: ", len(counties))
-    df = pl.DataFrame(counties)
-    del data, response, counties
-    df.write_csv(COUNTIES_FILE)
+
+    response = requests.get(URL_COUNTIES, headers=HEADERS_COUNTIES)
+    response.raise_for_status()  # Controlla ancora gli errori
+
+    with open(COUNTIES_FILE_TXT, "wb") as f:
+        f.write(response.content)
+    dataframe ={
+        "county_name": [],
+        "county_fips": [],
+        "state_name": [],
+        "state_fips": [],
+        "city_name": [],
+        "city_fips": []
+    }
+    actual_state = ""
+    actual_taste_fips = -1
+    ignore = False
+    independent_cities = False
+    with open(COUNTIES_FILE_TXT) as f:
+        for line in f:
+            line = line.strip()
+            if independent_cities:
+                handle_independent_cities(dataframe, line, actual_state, actual_taste_fips)
+            elif line.find("-") != -1 and actual_state == line.split('-')[0].strip():
+                ignore = False
+            elif line.find("-") != -1:
+                if line.split('-')[0].strip() != "VIRGINIA CITIES":
+                    actual_state = line.split('-')[0].strip()
+                    actual_taste_fips = int(line.split('-')[1].strip()[-2:])
+                    ignore = False
+                else:
+                    independent_cities = True
+            elif not ignore and (line == "" or line.find('COUNTIES') != -1):
+                ignore = True
+            elif not ignore:
+                line_split = split_line(line)
+                for i, item in enumerate(line_split):
+                    if i % 2 == 0:
+                        dataframe["county_name"].append(item.strip())
+                        dataframe["state_name"].append(actual_state)
+                        dataframe["state_fips"].append(actual_taste_fips)
+                    elif item.strip() != "":
+                        dataframe["county_fips"].append(int(item.strip()))
+
+
+    df = pl.DataFrame(dataframe)
+    df.write_csv(COUNTIES_FILE_CSV)
+    os.remove(COUNTIES_FILE_TXT)
+    print("Counties retrieved and converted to csv")
+
+def handle_independent_cities(df: dict, line: str, state: str, state_fips: int):
+
+
+
+def strip_deep(string: str):
+    return string.strip().strip('*').strip('*').strip('*').strip('#').strip('#').strip('o').strip('O')
+
+
+
+def split_line(line: str):
+    line_split = []
+    elements = []
+    for el in line.split('\t'):
+        if el.strip() != "":
+            elements += [it for it in el.split(' ') if it.strip() != ""]
+    county_name = ""
+    for el in elements:
+        if strip_deep(el).isdigit():
+            line_split.append(county_name.strip())
+            line_split.append(strip_deep(el))
+        else:
+            county_name += el + " "
+
+    return line_split
+
+
+
 
 def retrieve_data(url, output_file):
     num_pages = 100000

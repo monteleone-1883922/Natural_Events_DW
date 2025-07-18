@@ -10,28 +10,44 @@ WITH row,
      toInteger(row.f4) as f4
 WHERE sg = -9
 // add counties to existing tornadoes
+MATCH (s:State {fips_code: toInteger(row.stf)})
+OPTIONAL MATCH (ct1:County {fips_code: f1})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f1 > 0 AND ns = 1 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 5}]->(:County {fips_code: f1})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 5}]->(ct1)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
+OPTIONAL MATCH (ct2:County {fips_code: f2})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f2 > 0 AND ns = 1 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 6}]->(:County {fips_code: f2})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 6}]->(ct2)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
+OPTIONAL MATCH (ct3:County {fips_code: f3})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f3 > 0 AND ns = 1 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 7}]->(:County {fips_code: f3})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 7}]->(ct3)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
+OPTIONAL MATCH (ct4:County {fips_code: f4})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f4 > 0 AND ns = 1 THEN [1] ELSE [] END |
-  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 8}]->(:County {fips_code: f4})
+  MERGE (t)-[:AFFECTS_COUNTY {order_idx: 8}]->(ct4)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
 // add counties to existing traces
+OPTIONAL MATCH (ctr1:County {fips_code: f1})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f1 > 0 AND ns <> 1 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 5}]->(:County {fips_code: f1})
+  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 5}]->(ctr1)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
+OPTIONAL MATCH (ctr2:County {fips_code: f2})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f2 > 0 AND ns <> 1 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 6}]->(:County {fips_code: f2})
+  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 6}]->(ctr2)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
+OPTIONAL MATCH (ctr3:County {fips_code: f3})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f3 > 0 AND ns <> 1 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 7}]->(:County {fips_code: f3})
+  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 7}]->(ctr3)
 )
+WITH row, ns, sn, sg, f1, f2, f3, f4, s
+OPTIONAL MATCH (ctr4:County {fips_code: f4})-[:IN_STATE]->(s)
 FOREACH (_ IN CASE WHEN f4 > 0 AND ns <> 1 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 8}]->(:County {fips_code: f4})
+  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 8}]->(ctr4)
 );
