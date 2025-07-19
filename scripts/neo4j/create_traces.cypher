@@ -1,3 +1,6 @@
+CREATE RANGE INDEX tornado_id_index
+FOR (tor:Tornado)
+ON (tor.id);
 // create traces ----------------------------------
 LOAD CSV WITH HEADERS FROM 'file:///tornado.csv' AS row
 WITH row,
@@ -43,24 +46,43 @@ WHEN row.slat = t.latitudeStart AND row.slon = t.longitudeStart THEN 1
 WHEN row.elat = t.latitudeEnd AND row.elon = t.longitudeEnd THEN ns
 ELSE 2
 END}]->(tr)
-WITH tr, row, f1, f2, f3, f4, s
 // link to counties
+WITH tr, row, f1, f2, f3, f4, s, 1 as i
 OPTIONAL MATCH (c1:County {fips_code: f1})-[:IN_STATE]->(s)
-FOREACH (_ IN CASE WHEN f1 > 0 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 1}]->(c1)
+OPTIONAL MATCH (ic1:IndependentCity {fips_code: f1})-[:IN_STATE]->(s)
+FOREACH (_ IN CASE WHEN f1 > 0 AND c1 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(c1)
 )
-WITH tr, row, f1, f2, f3, f4, s
+FOREACH (_ IN CASE WHEN f1 > 0 AND c1 IS NULL AND ic1 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(ic1)
+)
+// F2 -------------------------------------
+WITH tr, row, f1, f2, f3, f4, s, CASE WHEN c1 IS NOT NULL OR ic1 IS NOT NULL THEN i+1 ELSE i END as i
 OPTIONAL MATCH (c2:County {fips_code: f2})-[:IN_STATE]->(s)
-FOREACH (_ IN CASE WHEN f2 > 0 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 2}]->(c2)
+OPTIONAL MATCH (ic2:IndependentCity {fips_code: f2})-[:IN_STATE]->(s)
+FOREACH (_ IN CASE WHEN f2 > 0 AND c2 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(c2)
 )
-WITH tr, row, f1, f2, f3, f4, s
+FOREACH (_ IN CASE WHEN f2 > 0 AND c2 IS NULL AND ic2 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(ic2)
+)
+// F3 -------------------------------------
+WITH tr, row, f1, f2, f3, f4, s, CASE WHEN c2 IS NOT NULL OR ic2 IS NOT NULL THEN i+1 ELSE i END as i
 OPTIONAL MATCH (c3:County {fips_code: f3})-[:IN_STATE]->(s)
-FOREACH (_ IN CASE WHEN f3 > 0 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 3}]->(c3)
+OPTIONAL MATCH (ic3:IndependentCity {fips_code: f3})-[:IN_STATE]->(s)
+FOREACH (_ IN CASE WHEN f3 > 0 AND c3 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(c3)
 )
-WITH tr, row, f1, f2, f3, f4, s
+FOREACH (_ IN CASE WHEN f3 > 0 AND c3 IS NULL AND ic3 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(ic3)
+)
+// F4 -------------------------------------
+WITH tr, row, f1, f2, f3, f4, s, CASE WHEN c3 IS NOT NULL OR ic3 IS NOT NULL THEN i+1 ELSE i END as i
 OPTIONAL MATCH (c4:County {fips_code: f4})-[:IN_STATE]->(s)
-FOREACH (_ IN CASE WHEN f4 > 0 THEN [1] ELSE [] END |
-  MERGE (tr)-[:AFFECTS_COUNTY {order_idx: 4}]->(c4)
+OPTIONAL MATCH (ic4:IndependentCity {fips_code: f4})-[:IN_STATE]->(s)
+FOREACH (_ IN CASE WHEN f4 > 0 AND c4 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(c4)
+)
+FOREACH (_ IN CASE WHEN f4 > 0 AND c4 IS NULL AND ic4 IS NOT NULL THEN [1] ELSE [] END |
+  MERGE (tr)-[:AFFECTS {order_idx: i}]->(ic4)
 );

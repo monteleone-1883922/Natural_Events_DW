@@ -56,7 +56,8 @@ def retrieve_counties():
         "state_name": [],
         "state_fips": [],
         "city_name": [],
-        "city_fips": []
+        "city_fips": [],
+        "city_region": []
     }
     actual_state = ""
     actual_taste_fips = -1
@@ -66,7 +67,7 @@ def retrieve_counties():
         for line in f:
             line = line.strip()
             if independent_cities:
-                handle_independent_cities(dataframe, line, actual_state, actual_taste_fips)
+                independent_cities, ignore = handle_independent_cities(dataframe, line, actual_state, actual_taste_fips)
             elif line.find("-") != -1 and actual_state == line.split('-')[0].strip():
                 ignore = False
             elif line.find("-") != -1:
@@ -85,6 +86,9 @@ def retrieve_counties():
                         dataframe["county_name"].append(item.strip())
                         dataframe["state_name"].append(actual_state)
                         dataframe["state_fips"].append(actual_taste_fips)
+                        dataframe["city_fips"].append(None)
+                        dataframe["city_region"].append(None)
+                        dataframe["city_name"].append(None)
                     elif item.strip() != "":
                         dataframe["county_fips"].append(int(item.strip()))
 
@@ -95,6 +99,40 @@ def retrieve_counties():
     print("Counties retrieved and converted to csv")
 
 def handle_independent_cities(df: dict, line: str, state: str, state_fips: int):
+    if line == "":
+        return False, True
+    else:
+        elements = []
+        for el in line.split('\t'):
+            if el.strip() != "":
+                elements += [it.strip() for it in el.split(' ') if it.strip() != ""]
+        city_name = ""
+        for i, el in enumerate(elements):
+            if el.isdigit():
+                df["city_name"].append(city_name.strip())
+                df["county_name"].append(None)
+                df["state_name"].append(state)
+                df["state_fips"].append(state_fips)
+                df["city_fips"].append(int(el))
+                if len(elements) > i+1:
+                    df["county_fips"].append(int(elements[i+1]))
+                else:
+                    df["county_fips"].append(None)
+                if len(elements) > i+2:
+                    df["city_region"].append(elements[i+2])
+                else:
+                    df["city_region"].append(None)
+                return True, False
+            else:
+                city_name += el + " "
+        raise Exception("no digit!")
+
+
+
+
+
+
+
 
 
 
@@ -108,7 +146,7 @@ def split_line(line: str):
     elements = []
     for el in line.split('\t'):
         if el.strip() != "":
-            elements += [it for it in el.split(' ') if it.strip() != ""]
+            elements += [it.strip() for it in el.split(' ') if it.strip() != ""]
     county_name = ""
     for el in elements:
         if strip_deep(el).isdigit():

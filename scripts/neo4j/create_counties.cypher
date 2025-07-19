@@ -1,6 +1,7 @@
 // crate States and Counties ---------------------
 LOAD CSV WITH HEADERS FROM 'file:///counties.csv' AS row
 WITH row, linenumber() AS incremental_id
+WHERE NOT row.county_name IS NULL
 MERGE (s:State {name: row.state_name,
                 fips_code: toInteger(row.state_fips)})
 MERGE (c:County {name: row.county_name,
