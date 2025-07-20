@@ -1,5 +1,5 @@
 // crate States and Counties ---------------------
-LOAD CSV WITH HEADERS FROM 'file:///counties.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///big_independent_cities.csv' AS row
 WITH row
 WHERE row.county_name IS NULL AND row.county_fips IS NULL
 CREATE (ic:IndependentCity {name: row.city_name,

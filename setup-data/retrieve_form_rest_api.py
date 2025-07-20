@@ -1,73 +1,67 @@
 import os
-import sys
 
 import requests
 import polars as pl
+from utils import *
 
-def print_progress_bar(percentuale, lunghezza_barra=20):
-    blocchi_compilati = int(lunghezza_barra * percentuale)
-    barra = "[" + "=" * (blocchi_compilati - 1) + ">" + " " * (lunghezza_barra - blocchi_compilati) + "]"
-    sys.stdout.write(f"\r{barra} {percentuale * 100:.2f}% completo")
-    sys.stdout.flush()
 
-# 1. URL dell'API REST
-URL_VOLCANO = 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanoes/{id}/info'
-URL_COUNTIES = 'https://www.spc.noaa.gov/wcm/stnindex_all.txt'
-URLS = {'tsunami': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/events',
-        'earthquake': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes',
-        'volcano': 'https://volcano.si.edu/database/list_volcano_holocene_excel.cfm',
-        'eruption': 'https://volcano.si.edu/database/GVP_Eruption_Search_Result.xlsx',
-        'tornado': 'https://www.spc.noaa.gov/wcm/data/1950-2024_all_tornadoes.csv',
-        }
-BASE_DATA_PATH = "../data/"
-COUNTIES_FILE_TXT = BASE_DATA_PATH + "counties.txt"
-COUNTIES_FILE_CSV = BASE_DATA_PATH + "counties.csv"
-HEADERS_COUNTIES = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
+
 # Parametri della query
 
-def build_county_json(county_raw):
-    if len(county_raw['ste_code']) != 1 or len(county_raw['coty_code']) != 1 or len(county_raw['coty_name_long']) != 1 \
-            or len(county_raw['coty_name']) != 1 or len(county_raw['ste_name']) != 1:
-        raise Exception('invalid county format')
-    return {
-        "state_FIPS": int(county_raw['ste_code'][0]),
-        "state_name": county_raw['ste_name'][0],
-        "county_code": int(county_raw['coty_code'][0]),
-        "county_name": county_raw['coty_name'][0],
-        "area": county_raw['coty_area_code'],
-        "county_type": county_raw['coty_type'],
-        "county_FIPS": int(county_raw['coty_fp_code']),
-        "county_gnis_code": int(county_raw['coty_gnis_code']),
-        "county_full_name": county_raw['coty_name_long'][0]
-    }
+
+
+def excel_to_csv(input_path, output_path, sheet_name=None):
+    """
+    Converte un file Excel (.xls o .xlsx) in CSV
+
+    Args:
+        input_path (str): Percorso del file Excel di input
+        output_path (str): Percorso del file CSV di output
+        sheet_name (str, optional): Nome del foglio da convertire. Se None, usa il primo foglio.
+    """
+    # Legge il file Excel
+    df = pl.read_excel(input_path)
+
+    # Scrive il DataFrame in formato CSV
+    df.write_csv(output_path)
+    os.remove(input_path)
+    print(f"File successfully converted: {input_path} -> {output_path}")
 
 def retrieve_counties():
-
-    response = requests.get(URL_COUNTIES, headers=HEADERS_COUNTIES)
+    url = get_url_from_setup('county')
+    response = requests.get(url, headers=HEADERS_COUNTIES)
     response.raise_for_status()  # Controlla ancora gli errori
+    tmp_file = get_tmp_filename_from_setup('county')
 
-    with open(COUNTIES_FILE_TXT, "wb") as f:
+    with open(tmp_file, "wb") as f:
         f.write(response.content)
-    dataframe ={
+    df_counties ={
         "county_name": [],
         "county_fips": [],
         "state_name": [],
+        "state_fips": []
+    }
+    df_independent_cities = {
         "state_fips": [],
         "city_name": [],
         "city_fips": [],
+        "county_fips": [],
         "city_region": []
+    }
+    df_big_independent_cities = {
+        "state_fips": [],
+        "city_name": [],
+        "city_fips": []
     }
     actual_state = ""
     actual_taste_fips = -1
     ignore = False
     independent_cities = False
-    with open(COUNTIES_FILE_TXT) as f:
+    with open(tmp_file) as f:
         for line in f:
             line = line.strip()
             if independent_cities:
-                independent_cities, ignore = handle_independent_cities(dataframe, line, actual_state, actual_taste_fips)
+                independent_cities, ignore = handle_independent_cities(df_independent_cities, df_big_independent_cities, line, actual_state, actual_taste_fips)
             elif line.find("-") != -1 and actual_state == line.split('-')[0].strip():
                 ignore = False
             elif line.find("-") != -1:
@@ -83,23 +77,24 @@ def retrieve_counties():
                 line_split = split_line(line)
                 for i, item in enumerate(line_split):
                     if i % 2 == 0:
-                        dataframe["county_name"].append(item.strip())
-                        dataframe["state_name"].append(actual_state)
-                        dataframe["state_fips"].append(actual_taste_fips)
-                        dataframe["city_fips"].append(None)
-                        dataframe["city_region"].append(None)
-                        dataframe["city_name"].append(None)
+                        df_counties["county_name"].append(item.strip())
+                        df_counties["state_name"].append(actual_state)
+                        df_counties["state_fips"].append(actual_taste_fips)
                     elif item.strip() != "":
-                        dataframe["county_fips"].append(int(item.strip()))
+                        df_counties["county_fips"].append(int(item.strip()))
 
-
-    df = pl.DataFrame(dataframe)
-    df.write_csv(COUNTIES_FILE_CSV)
-    os.remove(COUNTIES_FILE_TXT)
+    df = pl.DataFrame(df_counties)
+    df.write_csv(get_filename_from_setup('county', 'county'))
+    os.remove(tmp_file)
     print("Counties retrieved and converted to csv")
 
-def handle_independent_cities(df: dict, line: str, state: str, state_fips: int):
+def handle_independent_cities(df_independent_cities: dict, df_big_independent_cities: dict, line: str, state: str, state_fips: int):
     if line == "":
+        df1 = pl.DataFrame(df_independent_cities)
+        df1.write_csv(get_filename_from_setup('county', 'independent_city'))
+        df2 = pl.DataFrame(df_big_independent_cities)
+        df2.write_csv(get_filename_from_setup('county', 'big_independent_city'))
+        print("Finished preparing independent cities")
         return False, True
     else:
         elements = []
@@ -109,36 +104,24 @@ def handle_independent_cities(df: dict, line: str, state: str, state_fips: int):
         city_name = ""
         for i, el in enumerate(elements):
             if el.isdigit():
-                df["city_name"].append(city_name.strip())
-                df["county_name"].append(None)
-                df["state_name"].append(state)
-                df["state_fips"].append(state_fips)
-                df["city_fips"].append(int(el))
-                if len(elements) > i+1:
-                    df["county_fips"].append(int(elements[i+1]))
-                else:
-                    df["county_fips"].append(None)
                 if len(elements) > i+2:
-                    df["city_region"].append(elements[i+2])
+                    df_independent_cities["city_name"].append(city_name.strip())
+                    df_independent_cities["state_fips"].append(state_fips)
+                    df_independent_cities["city_fips"].append(int(el))
+                    df_independent_cities["city_region"].append(elements[i+2])
+                    df_independent_cities["county_fips"].append(int(elements[i + 1]))
                 else:
-                    df["city_region"].append(None)
+                    df_big_independent_cities["city_name"].append(city_name.strip())
+                    df_big_independent_cities["state_fips"].append(state_fips)
+                    df_big_independent_cities["city_fips"].append(int(el))
                 return True, False
             else:
                 city_name += el + " "
         raise Exception("no digit!")
 
 
-
-
-
-
-
-
-
-
 def strip_deep(string: str):
     return string.strip().strip('*').strip('*').strip('*').strip('#').strip('#').strip('o').strip('O')
-
 
 
 def split_line(line: str):
@@ -231,36 +214,53 @@ def retrieve_data_simple(url, filename):
             f.write(chunk)
 
     print(f"File saved: {filename}")
-    if url_idx == 'tornado':
-        fix_tornado_ids(filename)
-        retrieve_counties()
 
+def setup_tornadoes():
+    tmp_filename = get_tmp_filename_from_setup('tornado')
+    retrieve_data_simple(get_url_from_setup('tornado'), tmp_filename)
+    df = pl.read_csv(tmp_filename)
+    df = fix_tornado_ids(df)
+    tornado_df = df.filter(
+        ((pl.col("ns") == 1) & (pl.col("sn") == 1) & (pl.col("sg") == 1)) |
+        ((pl.col("ns") != 1) & (pl.col("sn") == 0) & (pl.col("sg") == 1))
+    )
+    traces_df = df.filter((pl.col("ns") != 1) & (pl.col("sn") == 1) & (pl.col("sg") == 2))
+    link_counties_df = df.filter((pl.col("sg") == -9))
 
-def fix_tornado_ids(filename):
-    df = pl.read_csv(filename)
+    tornado_df.write_csv(get_filename_from_setup('tornado', 'tornado'))
+    traces_df.write_csv(get_filename_from_setup('tornado', 'trace'))
+    link_counties_df.write_csv(get_filename_from_setup('tornado', 'link_county'))
+    os.remove(tmp_filename)
+    print('Finished setup Tornadoes')
 
-
+def fix_tornado_ids(df):
     df = df.with_columns(
         (pl.col("yr").cast(pl.Utf8) + pl.col("om").cast(pl.Utf8)).cast(pl.Int64).alias("id")
     )
-    df.write_csv(filename)
-    print(f"added  id column to file: {filename}")
+    return df
+
+
+def setup(url_idx):
+    if url_idx not in SETUP_DATA.keys():
+        print("Invalid URL index.")
+        print("Valid indices:", list(SETUP_DATA.keys()))
+        sys.exit(1)
+    if url_idx in ['tsunami', 'earthquake']:
+        pass #retrieve_data(URLS[url_idx], filename)
+    elif url_idx == 'county':
+        retrieve_counties()
+    elif url_idx in ['eruption', 'volcano']:
+        pass
+    elif url_idx == 'tornado':
+        setup_tornadoes()
 
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Usage: python script_name.py <url> <output_file>")
         sys.exit(1)
     url_idx = sys.argv[1]
-    if url_idx not in URLS.keys():
-        print("Invalid URL index.")
-        print("Valid indices:", list(URLS.keys()))
-        sys.exit(1)
-    filename = BASE_DATA_PATH + sys.argv[2]
-    if url_idx in ['tsunami', 'earthquake']:
-        retrieve_data(URLS[url_idx], filename)
-    else:
-        retrieve_data_simple(URLS[url_idx], filename)
+    setup(url_idx)
 
 

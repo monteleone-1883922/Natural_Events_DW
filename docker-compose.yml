@@ -1,5 +1,11 @@
 version: '3.9'
 services:
+  data-setup:
+    build:
+      context: setup-data
+      dockerfile: Dockerfile
+    volumes:
+      - ./neo4j/data:/neo4j/data
   neo4j:
     image: neo4j:5.26
     container_name: neo4j
@@ -15,21 +21,59 @@ services:
       NEO4J_apoc_export_file_enabled: "true"
       NEO4J_dbms_connector_bolt_advertised__address: localhost:7687
     volumes:
-      - ./data:/var/lib/neo4j/import
-      - ./data:/var/lib/neo4j/data
-
+      - ./neo4j/data:/var/lib/neo4j/import
+      - ./neo4j/data:/var/lib/neo4j/data
+    depends_on:
+      data-setup:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "cypher-shell", "-u", "neo4j", "-p", "password1234", "RETURN 1" ]
       interval: 15s
       timeout: 20s
       retries: 15
-  seed:
+  neo4j_seed:
     image: neo4j:5.26
     container_name: neo4j-seed
     depends_on:
       neo4j:
         condition: service_healthy
     volumes:
-      - ./scripts/neo4j:/init
-      - ./data:/var/lib/neo4j/import
+      - ./neo4j/scripts:/init
+      - ./neo4j/data:/var/lib/neo4j/import
     entrypoint: [ "bash", "/init/init.sh" ]
+  mongodb:
+    image: mongo:8.0.11
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: password1234
+      MONGO_INITDB_DATABASE: volcano
+    volumes:
+      - ./mongodb/data:/data/db
+    depends_on:
+      data-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  mongodb_seed:
+    container_name: mongodb-seed
+    build:
+      context: ./mongodb/script
+      dockerfile: Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:password1234@mongodb:27017/volcano?authSource=admin
+      MONGO_DATABASE: volcano
+    volumes:
+      - shared-data:/data  # TODO: check
+    depends_on:
+      mongodb:
+        condition: service_healthy  # Aspetta che MongoDB sia effettivamente pronto
+    restart: "no"
+

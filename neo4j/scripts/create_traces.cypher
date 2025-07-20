@@ -2,7 +2,7 @@ CREATE RANGE INDEX tornado_id_index
 FOR (tor:Tornado)
 ON (tor.id);
 // create traces ----------------------------------
-LOAD CSV WITH HEADERS FROM 'file:///tornado.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///traces.csv' AS row
 WITH row,
      toInteger(row.ns) as ns,
      toInteger(row.sn) as sn,
@@ -11,7 +11,6 @@ WITH row,
      toInteger(row.f2) as f2,
      toInteger(row.f3) as f3,
      toInteger(row.f4) as f4
-WHERE ns <> 1 AND sn = 1 AND sg = 2
 // create tornado trace
 CREATE (tr:Trace {id: toInteger(row.id),
             year: toInteger(row.yr),

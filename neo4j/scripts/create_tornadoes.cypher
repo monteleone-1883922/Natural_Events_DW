@@ -8,7 +8,7 @@ CREATE RANGE INDEX city_fips_index
 FOR (ic:IndependentCity)
 ON (ic.fips_code);
 // create Tornadoes ----------------------------------
-LOAD CSV WITH HEADERS FROM 'file:///tornado.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///tornadoes.csv' AS row
 
 WITH row,
      toInteger(row.ns) as ns,
@@ -19,7 +19,6 @@ WITH row,
      toInteger(row.f3) as f3,
      toInteger(row.f4) as f4
 
-WHERE (ns = 1 AND sn = 1 AND sg = 1) OR (ns <> 1 AND sn = 0 AND sg = 1)
 // create tornado
 CREATE (t:Tornado {id: toInteger(row.id),
             year: toInteger(row.yr),

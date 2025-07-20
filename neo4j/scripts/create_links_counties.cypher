@@ -2,7 +2,7 @@ CREATE RANGE INDEX trace_id_index
 FOR (tra:Trace)
 ON (tra.id);
 // add missing counties to existing tornadoes and traces
-LOAD CSV WITH HEADERS FROM 'file:///tornado.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///link_counties.csv' AS row
 WITH row,
      toInteger(row.ns) as ns,
      toInteger(row.sn) as sn,
@@ -12,7 +12,6 @@ WITH row,
      toInteger(row.f3) as f3,
      toInteger(row.f4) as f4,
      5 as i
-WHERE sg = -9
 // add counties to existing tornadoes
 MATCH (s:State {fips_code: toInteger(row.stf)})
 MATCH (t:Tornado {id: toInteger(row.id)})
