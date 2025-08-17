@@ -36,18 +36,48 @@ SETUP_DATA = {
     'eruption-times': {
         'output_file': 'eruption_times.csv',
         'database': 'mongodb',
-        'data': {
-            "D1": "Last known eruption 1964 or later",
-            "D2": "Last known eruption 1900-1963",
-            "D3": "Last known eruption 1800-1899",
-            "D4": "Last known eruption 1700-1799",
-            "D5": "Last known eruption 1500-1699",
-            "D6": "Last known eruption A.D. 1-1499",
-            "D7": "Last known eruption B.C. (Holocene)",
-            "U": "Undated, but probable Holocene eruption",
-            "Q": "Quaternary eruption(s) with the only known Holocene activity being hydrothermal",
-            "?": "Uncertain Holocene eruption"
-        }
+        'data': [
+            {
+                "type": "D1",
+                "description": "Last known eruption 1964 or later"
+             },
+            {
+                "type": "D2",
+                "description": "Last known eruption 1900-1963"
+            },
+            {
+                "type": "D3",
+                "description": "Last known eruption 1800-1899"
+            },
+            {
+                "type": "D4",
+                "description": "Last known eruption 1700-1799"
+            },
+            {
+                "type": "D5",
+                "description": "Last known eruption 1500-1699"
+            },
+            {
+                "type": "D6",
+                "description": "Last known eruption A.D. 1-1499"
+            },
+            {
+                "type": "D7",
+                "description": "Last known eruption B.C. (Holocene)"
+            },
+            {
+                "type": "U",
+                "description": "Undated, but probable Holocene eruption"
+            },
+            {
+                "type": "Q",
+                "description": "Quaternary eruption(s) with the only known Holocene activity being hydrothermal"
+            },
+            {
+                "type": "?",
+                "description": "Uncertain Holocene eruption"
+            }
+        ]
     },
     'tornado': {
         'url': 'https://www.spc.noaa.gov/wcm/data/1950-2024_all_tornadoes.csv',

@@ -10,8 +10,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia lo script Python
 COPY seed_data.py .
 
-# Copia i dati CSV nella directory /app/data
-COPY data/ ./data/
-
 # Imposta il comando di default
-CMD ["python", "seed_data.py"]
+ENTRYPOINT ["python3", "seed_data.py"]

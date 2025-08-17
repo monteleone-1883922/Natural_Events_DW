@@ -1,4 +1,2 @@
-polars>=1.31.0
-openpyxl>=3.1.5
-pyxlsb
-requests>=2.32.3
+polars==1.31.0
+requests==2.32.3
