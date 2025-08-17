@@ -5,9 +5,10 @@ def print_progress_bar(percentuale, lunghezza_barra=20):
     barra = "[" + "=" * (blocchi_compilati - 1) + ">" + " " * (lunghezza_barra - blocchi_compilati) + "]"
     sys.stdout.write(f"\r{barra} {percentuale * 100:.2f}% completo")
     sys.stdout.flush()
+    if percentuale == 1:
+        print("")
 
 # 1. URL dell'API REST
-URL_VOLCANO = 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanoes/{id}/info'
 SETUP_DATA = {
     'tsunami': {
         'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/events',
@@ -18,12 +19,35 @@ SETUP_DATA = {
         'output_file': 'earthquake.csv'
     },
     'volcano': {
-        'url': 'https://volcano.si.edu/database/list_volcano_holocene_excel.cfm',
-        'output_file': 'tsunami.csv'
+        'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanolocs',
+        'output_file': 'volcanoes.csv',
+        'database': 'mongodb'
     },
     'eruption': {
-        'url': 'https://volcano.si.edu/database/GVP_Eruption_Search_Result.xlsx',
-        'output_file': 'volcano.csv'
+        'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanoes',
+        'output_file': 'eruptions.csv',
+        'database': 'mongodb'
+    },
+    'volcano-region': {
+        'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/descriptors/volcano/regions',
+        'output_file': 'volcano_regions.csv',
+        'database': 'mongodb'
+    },
+    'eruption-times': {
+        'output_file': 'eruption_times.csv',
+        'database': 'mongodb',
+        'data': {
+            "D1": "Last known eruption 1964 or later",
+            "D2": "Last known eruption 1900-1963",
+            "D3": "Last known eruption 1800-1899",
+            "D4": "Last known eruption 1700-1799",
+            "D5": "Last known eruption 1500-1699",
+            "D6": "Last known eruption A.D. 1-1499",
+            "D7": "Last known eruption B.C. (Holocene)",
+            "U": "Undated, but probable Holocene eruption",
+            "Q": "Quaternary eruption(s) with the only known Holocene activity being hydrothermal",
+            "?": "Uncertain Holocene eruption"
+        }
     },
     'tornado': {
         'url': 'https://www.spc.noaa.gov/wcm/data/1950-2024_all_tornadoes.csv',
@@ -54,3 +78,6 @@ def get_url_from_setup(setup):
 
 def get_tmp_filename_from_setup(setup):
     return get_filename_from_setup(setup, 'tmp_file')
+
+def get_output_filename_from_setup(setup):
+    return get_filename_from_setup(setup, 'output_file')

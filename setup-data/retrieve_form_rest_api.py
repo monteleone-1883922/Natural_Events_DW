@@ -5,28 +5,6 @@ import polars as pl
 from utils import *
 
 
-
-# Parametri della query
-
-
-
-def excel_to_csv(input_path, output_path, sheet_name=None):
-    """
-    Converte un file Excel (.xls o .xlsx) in CSV
-
-    Args:
-        input_path (str): Percorso del file Excel di input
-        output_path (str): Percorso del file CSV di output
-        sheet_name (str, optional): Nome del foglio da convertire. Se None, usa il primo foglio.
-    """
-    # Legge il file Excel
-    df = pl.read_excel(input_path)
-
-    # Scrive il DataFrame in formato CSV
-    df.write_csv(output_path)
-    os.remove(input_path)
-    print(f"File successfully converted: {input_path} -> {output_path}")
-
 def retrieve_counties():
     url = get_url_from_setup('county')
     response = requests.get(url, headers=HEADERS_COUNTIES)
@@ -143,7 +121,7 @@ def split_line(line: str):
 
 
 
-def retrieve_data(url, output_file):
+def retrieve_data(url, output_file='', write_down=True):
     num_pages = 100000
     i=1
     items = []
@@ -165,43 +143,9 @@ def retrieve_data(url, output_file):
 
     # 4. Converte in DataFrame e mostra un'anteprima
     df = pl.DataFrame(items)
-    del items
-    #df = df[df['volcanoEventId'].notna()]
-    df = df.with_columns(
-        pl.lit(None).alias("related_volcano_number"),  # Colonna con valori None
-        pl.lit(None).alias("related_eruption_date")
-    )
-
-    volcano_ids = df.filter(pl.col("volcanoEventId").is_not_null())
-    volcano_ids = volcano_ids.select(["id", "volcanoEventId"])
-    unfound_volcanoes = 0
-    print("\nRetrieving volcano info")
-    for i,row in enumerate(volcano_ids.iter_rows(named=True)):
-        print_progress_bar(i/len(volcano_ids))
-        response = requests.get(URL_VOLCANO.format(id=str(row["volcanoEventId"])))
-        if response.status_code != 200:
-            print("error response volcano event")
-            exit(1)
-        data = response.json()
-        if "newNum" in data:
-            volcano_num = data["newNum"]
-            df = df.with_columns([
-                # Modifica primo campo
-                pl.when(pl.col("id") == row['id'])
-                .then(volcano_num)
-                .otherwise(pl.col("related_volcano_number"))
-                .alias("related_volcano_number"),
-
-                # Modifica secondo campo
-                pl.when(pl.col("id") == row['id'])
-                .then(pl.col("year"))
-                .otherwise(pl.col("related_eruption_date"))
-                .alias("related_eruption_date")
-            ])
-        else:
-            unfound_volcanoes += 1
-    print("\nUnfound volcanoes: ", unfound_volcanoes)
-    df.write_csv(output_file)
+    if write_down:
+        df.write_csv(output_file)
+    return df
 
 def retrieve_data_simple(url, filename):
 
@@ -215,7 +159,25 @@ def retrieve_data_simple(url, filename):
 
     print(f"File saved: {filename}")
 
+
+def setup_volcano():
+    retrieve_data(get_url_from_setup('volcano'), get_output_filename_from_setup('volcano'))
+    print("\nVolcanoes retrieved and converted to csv")
+    df_eruption = retrieve_data(get_url_from_setup('eruption'), write_down=False)
+    df_eruption = df_eruption.drop(["volcanoLocationNewNum", "volcanoLocationNum", "elevation", "morphology"])
+    df_eruption = df_eruption.rename({"volcanoLocationId": "volcano_id"})
+    df_eruption.write_csv(get_output_filename_from_setup('eruption'))
+    print("\nEruptions retrieved and converted to csv")
+    retrieve_data(get_url_from_setup('volcano-region'), get_output_filename_from_setup('volcano-region'))
+    print("\nVolcano-Regions retrieved and converted to csv")
+    df = pl.DataFrame(SETUP_DATA['eruption-times']['data'])
+    df.write_csv(get_output_filename_from_setup('eruption-times'))
+    print("\nEruption-Times retrieved and converted to csv")
+
+
+
 def setup_tornadoes():
+
     tmp_filename = get_tmp_filename_from_setup('tornado')
     retrieve_data_simple(get_url_from_setup('tornado'), tmp_filename)
     df = pl.read_csv(tmp_filename)
@@ -249,8 +211,8 @@ def setup(url_idx):
         pass #retrieve_data(URLS[url_idx], filename)
     elif url_idx == 'county':
         retrieve_counties()
-    elif url_idx in ['eruption', 'volcano']:
-        pass
+    elif url_idx == 'volcano':
+        setup_volcano()
     elif url_idx == 'tornado':
         setup_tornadoes()
 
