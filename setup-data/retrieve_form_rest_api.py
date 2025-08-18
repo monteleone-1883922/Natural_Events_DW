@@ -142,7 +142,7 @@ def retrieve_data(url, output_file='', write_down=True):
     del data, response
 
     # 4. Converte in DataFrame e mostra un'anteprima
-    df = pl.DataFrame(items)
+    df = pl.from_dicts(items, infer_schema_length=None)
     if write_down:
         df.write_csv(output_file)
     return df
@@ -163,16 +163,27 @@ def retrieve_data_simple(url, filename):
 def setup_volcano():
     retrieve_data(get_url_from_setup('volcano'), get_output_filename_from_setup('volcano'))
     print("\nVolcanoes retrieved and converted to csv")
-    df_eruption = retrieve_data(get_url_from_setup('eruption'), write_down=False)
-    df_eruption = df_eruption.drop(["volcanoLocationNewNum", "volcanoLocationNum", "elevation", "morphology"])
-    df_eruption = df_eruption.rename({"volcanoLocationId": "volcano_id"})
-    df_eruption.write_csv(get_output_filename_from_setup('eruption'))
+    retrieve_data(get_url_from_setup('eruption'), write_down=False) \
+        .drop(["volcanoLocationNewNum", "volcanoLocationNum", "elevation", "morphology"]) \
+        .rename({"volcanoLocationId": "volcano_id"}) \
+        .write_csv(get_output_filename_from_setup('eruption'))
     print("\nEruptions retrieved and converted to csv")
     retrieve_data(get_url_from_setup('volcano-region'), get_output_filename_from_setup('volcano-region'))
     print("\nVolcano-Regions retrieved and converted to csv")
     df = pl.DataFrame(SETUP_DATA['eruption-times']['data'])
     df.write_csv(get_output_filename_from_setup('eruption-times'))
     print("\nEruption-Times retrieved and converted to csv")
+
+def setup_earthquakes():
+    df_earthquake = retrieve_data(get_url_from_setup('earthquake'), write_down=False)
+    df_regions = retrieve_data(SETUP_DATA['earthquake']['url-regions'], write_down=False)
+    df_earthquake.with_columns(pl.col("regionCode").cast(pl.Utf8)) \
+        .join(df_regions, left_on="regionCode", right_on="id") \
+        .rename({"description": "regionName"}) \
+        .drop(["regionCode"]) \
+        .write_csv(get_output_filename_from_setup('earthquake'))
+
+    print("\nEarthquakes retrieved and converted to csv")
 
 
 
@@ -207,8 +218,8 @@ def setup(url_idx):
         print("Invalid URL index.")
         print("Valid indices:", list(SETUP_DATA.keys()))
         sys.exit(1)
-    if url_idx in ['tsunami', 'earthquake']:
-        pass #retrieve_data(URLS[url_idx], filename)
+    if url_idx == 'earthquake':
+        setup_earthquakes()
     elif url_idx == 'county':
         retrieve_counties()
     elif url_idx == 'volcano':

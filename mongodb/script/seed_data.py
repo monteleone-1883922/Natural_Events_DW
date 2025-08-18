@@ -3,18 +3,18 @@ from pymongo import MongoClient
 import os
 import logging
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
 
 
 class MongoCSVLoader:
-    def __init__(self,username, password, mongo_host="mongodb", mongo_port=27017, db_name="volcanoes"):
+    def __init__(self,username, password, logger, mongo_host="mongodb", mongo_port=27017, db_name="volcanoes"):
         self.client = MongoClient(f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}/{db_name}?authSource=admin")
         self.db = self.client[db_name]
-        logger.info(f"Connected to MongoDB: {mongo_host}:{mongo_port}/{db_name}")
+        self.logger = logger
+        self.logger.info(f"Connected to MongoDB: {mongo_host}:{mongo_port}/{db_name}")
 
     def create_indexes(self):
-        logger.info("Creating database indexes...")
+        self.logger.info("Creating database indexes...")
 
         try:
             # INDICI PER COLLECTION VOLCANOES
@@ -22,97 +22,97 @@ class MongoCSVLoader:
 
             # Indice univoco su id (primary key naturale)
             volcanoes_collection.create_index("id", unique=True)
-            logger.info("✅ Created unique index on volcanoes.id")
+            self.logger.info("✅ Created unique index on volcanoes.id")
 
             # Indice geografico per query spaziali
             volcanoes_collection.create_index([("position", "2dsphere")])
-            logger.info("✅ Created 2dsphere index on volcanoes.position")
+            self.logger.info("✅ Created 2dsphere index on volcanoes.position")
 
             # Indici per filtri comuni
             volcanoes_collection.create_index("country")
             volcanoes_collection.create_index("region")
             volcanoes_collection.create_index("status")
             volcanoes_collection.create_index("morphology")
-            logger.info("✅ Created indexes on volcanoes filter fields")
+            self.logger.info("✅ Created indexes on volcanoes filter fields")
 
             # Indice composto per query geografiche per paese/regione
             volcanoes_collection.create_index([("country", 1), ("region", 1)])
-            logger.info("✅ Created compound index on volcanoes.country+region")
+            self.logger.info("✅ Created compound index on volcanoes.country+region")
 
             # INDICI PER COLLECTION ERUPTIONS
             eruptions_collection = self.db['eruptions']
 
             # Indice univoco su id
             eruptions_collection.create_index("id", unique=True)
-            logger.info("✅ Created unique index on eruptions.id")
+            self.logger.info("✅ Created unique index on eruptions.id")
 
             # INDICE FONDAMENTALE: volcano_id per i lookup
             eruptions_collection.create_index("volcano_id")
-            logger.info("✅ Created index on eruptions.volcano_id (for lookups)")
+            self.logger.info("✅ Created index on eruptions.volcano_id (for lookups)")
 
             # Indici per range query temporali
             eruptions_collection.create_index("date")
-            logger.info("✅ Created indexes on eruptions temporal fields")
+            self.logger.info("✅ Created indexes on eruptions temporal fields")
 
             # Indice per VEI (Volcanic Explosivity Index)
             eruptions_collection.create_index("vei")
-            logger.info("✅ Created index on eruptions.vei")
+            self.logger.info("✅ Created index on eruptions.vei")
 
             # Indici per query su eventi significativi
             eruptions_collection.create_index("significant")
-            logger.info("✅ Created indexes on eruptions significance fields")
+            self.logger.info("✅ Created indexes on eruptions significance fields")
 
             # Indice geografico per eruzioni
             eruptions_collection.create_index([("position", "2dsphere")])
-            logger.info("✅ Created 2dsphere index on eruptions.position")
+            self.logger.info("✅ Created 2dsphere index on eruptions.position")
 
             # Indici composti per query complesse comuni
             eruptions_collection.create_index([("volcano_id", 1), ("vei", -1)])  # eruzioni più forti per vulcano
-            logger.info("✅ Created compound indexes on eruptions")
+            self.logger.info("✅ Created compound indexes on eruptions")
 
             # INDICI PER COLLECTION VOLCANOES_AGGREGATED
             volcanoes_agg_collection = self.db['volcanoes_aggregated']
 
             # Indice su volcano_id
             volcanoes_agg_collection.create_index("volcano_id", unique=True)
-            logger.info("✅ Created unique index on volcanoes_aggregated.volcano_id")
+            self.logger.info("✅ Created unique index on volcanoes_aggregated.volcano_id")
 
             # Indici sulle statistiche per ordinamenti e filtri
             volcanoes_agg_collection.create_index("eruption_stats.total_eruptions")
             volcanoes_agg_collection.create_index("eruption_stats.last_eruption_date")
             volcanoes_agg_collection.create_index("eruption_stats.max_vei")
             volcanoes_agg_collection.create_index("eruption_stats.total_deaths")
-            logger.info("✅ Created indexes on volcanoes_aggregated statistics")
+            self.logger.info("✅ Created indexes on volcanoes_aggregated statistics")
 
             # Indice geografico
             volcanoes_agg_collection.create_index([("position", "2dsphere")])
-            logger.info("✅ Created 2dsphere index on volcanoes_aggregated.position")
+            self.logger.info("✅ Created 2dsphere index on volcanoes_aggregated.position")
 
             # Indici per filtri comuni
             volcanoes_agg_collection.create_index("country")
             volcanoes_agg_collection.create_index("region")
             volcanoes_agg_collection.create_index("status")
-            logger.info("✅ Created indexes on volcanoes_aggregated filter fields")
+            self.logger.info("✅ Created indexes on volcanoes_aggregated filter fields")
 
             # INDICI PER COLLECTION REGIONS
             regions_collection = self.db['regions']
             regions_collection.create_index("id")
-            logger.info("✅ Created index on regions.id")
+            self.logger.info("✅ Created index on regions.id")
 
 
             # INDICI PER COLLECTION EPOCHS
             epochs_collection = self.db['epochs']
             epochs_collection.create_index("type")
 
-            logger.info("🎯 All database indexes created successfully!")
+            self.logger.info("🎯 All database indexes created successfully!")
 
         except Exception as e:
-            logger.error(f"❌ Error creating indexes: {e}")
+            self.logger.error(f"❌ Error creating indexes: {e}")
             raise
 
     def load_regions(self, csv_path: str):
 
-        logger.info("Loading regions...")
+        self.logger.info("Loading regions...")
         df_regions = pl.read_csv(csv_path)
         collection = self.db['regions']
         collection.drop()
@@ -120,24 +120,24 @@ class MongoCSVLoader:
 
         if documents:
             result = collection.insert_many(documents)
-            logger.info(f"inserted {len(result.inserted_ids)} regions")
+            self.logger.info(f"inserted {len(result.inserted_ids)} regions")
 
 
     def load_epochs(self, csv_path: str):
 
-        logger.info("Loading epochs...")
+        self.logger.info("Loading epochs...")
         df_epoch = pl.read_csv(csv_path)
         collection = self.db['epochs']
         collection.drop()
         documents = df_epoch.to_dicts()
         if documents:
             result = collection.insert_many(documents)
-            logger.info(f"Inserted {len(result.inserted_ids)} epochs")
+            self.logger.info(f"Inserted {len(result.inserted_ids)} epochs")
 
 
     def load_volcanoes(self, csv_path: str):
 
-        logger.info("Loading volcanoes...")
+        self.logger.info("Loading volcanoes...")
         df_volcanoes = pl.read_csv(csv_path).with_columns(
                 pl.struct([
                     pl.lit("Point").alias("type"),
@@ -151,13 +151,13 @@ class MongoCSVLoader:
         documents = df_volcanoes.to_dicts()
         if documents:
             result = collection.insert_many(documents)
-            logger.info(f"Inserted {len(result.inserted_ids)} volcanoes")
+            self.logger.info(f"Inserted {len(result.inserted_ids)} volcanoes")
 
 
 
     def load_eruptions(self, csv_path: str):
 
-        logger.info("Loading eruptions...")
+        self.logger.info("Loading eruptions...")
         df_eruptions = pl.read_csv(csv_path).with_columns(
                 pl.datetime(pl.col('year'), pl.col('month'), pl.col('day')).alias('date'),
                 # Converti longitudine e latitudine a float
@@ -176,10 +176,10 @@ class MongoCSVLoader:
 
         if documents:
             result = collection.insert_many(documents)
-            logger.info(f"Inserted {len(result.inserted_ids)} eruptions")
+            self.logger.info(f"Inserted {len(result.inserted_ids)} eruptions")
 
     def create_aggregated_volcanoes(self):
-        logger.info("Creating aggregated volcanoes collection...")
+        self.logger.info("Creating aggregated volcanoes collection...")
 
         pipeline = [
             {
@@ -269,9 +269,9 @@ class MongoCSVLoader:
 
         if results:
             collection_aggregated.insert_many(results)
-            logger.info(f"✅ Created {len(results)} aggregated volcano documents")
+            self.logger.info(f"✅ Created {len(results)} aggregated volcano documents")
         else:
-            logger.warning("⚠️ No aggregated documents created")
+            self.logger.warning("⚠️ No aggregated documents created")
 
 
     def load_all_data(self, csv_dir: str):
@@ -287,15 +287,15 @@ class MongoCSVLoader:
 
 
 
-            logger.info("✅ All successfully loaded!")
+            self.logger.info("✅ All successfully loaded!")
 
         except Exception as e:
-            logger.error(f"❌ Error during loading: {e}")
+            self.logger.error(f"❌ Error during loading: {e}")
             raise
 
     def close(self):
         self.client.close()
-        logger.info("closed connection to mongodb")
+        self.logger.info("closed connection to mongodb")
 
 def make_point(lon, lat):
     return {
@@ -313,9 +313,13 @@ if __name__ == "__main__":
     MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "password1234")
     DB_NAME = os.getenv("MONGO_DATABASE", "volcanoes")
 
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
     loader = MongoCSVLoader(
         mongo_host=MONGO_HOST,
         db_name=DB_NAME,
+        logger=logger,
         username=MONGO_USERNAME,
         password=MONGO_PASSWORD
     )

@@ -16,7 +16,9 @@ SETUP_DATA = {
     },
     'earthquake': {
         'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes',
-        'output_file': 'earthquake.csv'
+        'url-regions': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/descriptors/earthquake/regions',
+        'output_file': 'earthquake.csv',
+        'database': 'cassandra'
     },
     'volcano': {
         'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/volcanolocs',
