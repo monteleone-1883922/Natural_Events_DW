@@ -177,7 +177,8 @@ def setup_volcano():
 def setup_earthquakes():
     df_earthquake = retrieve_data(get_url_from_setup('earthquake'), write_down=False)
     df_regions = retrieve_data(SETUP_DATA['earthquake']['url-regions'], write_down=False)
-    df_earthquake.with_columns(pl.col("regionCode").cast(pl.Utf8)) \
+    df_earthquake.filter(pl.col("id").is_not_null()) \
+        .with_columns(pl.col("regionCode").cast(pl.Utf8)) \
         .join(df_regions, left_on="regionCode", right_on="id") \
         .rename({"description": "regionName"}) \
         .drop(["regionCode"]) \

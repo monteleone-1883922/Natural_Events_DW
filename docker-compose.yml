@@ -78,6 +78,8 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      mongodb_seed:
+        condition: service_completed_successfully
   mongodb_seed:
     container_name: mongodb-seed
     build:
@@ -90,8 +92,65 @@ services:
       MONGO_PASSWORD: password1234
     volumes:
       - ./mongodb/data:/app/data
+      - ./mongodb/script/seed_data.py:/app/seed_data.py
     depends_on:
       mongodb:
         condition: service_healthy
     restart: "no"
+  cassandra:
+    image: cassandra:5.0
+    container_name: cassandra
+    restart: unless-stopped
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_USER: cassandra
+      CASSANDRA_PASSWORD: password1234
+      CASSANDRA_SUPERUSER_PASSWORD: password1234
+    volumes:
+      - ./cassandra/data:/var/lib/cassandra/data
+    depends_on:
+      data-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD-SHELL", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' || exit 1" ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+  cassandra_web:
+    image: ipushc/cassandra-web
+    container_name: cassandra_web
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      cassandra_seed:
+        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_HOST=cassandra
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_USER=cassandra
+      - CASSANDRA_PASSWORD=password1234
+    ports:
+      - "3007:3007"
+  cassandra_seed:
+    container_name: cassandra-seed
+    build:
+      context: ./cassandra/script
+      dockerfile: Dockerfile
+    environment:
+      CASSANDRA_HOST: cassandra
+      CASSANDRA_PORT: 9042
+      CASSANDRA_KEYSPACE: earthquakes
+      CASSANDRA_USERNAME: cassandra
+      CASSANDRA_PASSWORD: password1234
+      INPUT_FILE: /app/data/earthquake.csv
+    volumes:
+      - ./cassandra/data:/app/data
+      - ./cassandra/script/seed_data.py:/app/seed_data.py
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    restart: "no"
+
 

@@ -1,0 +1,2 @@
+cassandra-driver
+polars==1.31.0
