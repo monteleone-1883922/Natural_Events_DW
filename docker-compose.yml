@@ -132,7 +132,7 @@ services:
       - CASSANDRA_USER=cassandra
       - CASSANDRA_PASSWORD=password1234
     ports:
-      - "3007:3007"
+      - "8083:8083"
   cassandra_seed:
     container_name: cassandra-seed
     build:
