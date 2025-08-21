@@ -152,5 +152,57 @@ services:
       cassandra:
         condition: service_healthy
     restart: "no"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.2
+    container_name: elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    depends_on:
+      data-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.1.2
+    container_name: kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana_seed:
+        condition: service_completed_successfully
+  kibana_seed:
+    container_name: elasticsearch-seed
+    build:
+      context: ./elasticsearch/script
+      dockerfile: Dockerfile
+    environment:
+      KIBANA_HOST: kibana
+      KIBANA_PORT: 5601
+      ELASTICSEARCH_HOST: elasticsearch
+      ELASTICSEARCH_PORT: 9200
+      INDEX_NAME: tsunami_events
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      DATA_SOURCE_PATH: /app/data/tsunami.csv
+    volumes:
+      - ./elasticsearch/data:/app
+      - ./elasticsearch/script/seed_data.py:/app/seed_data.py
+
+
 
 

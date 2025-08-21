@@ -12,7 +12,12 @@ def print_progress_bar(percentuale, lunghezza_barra=20):
 SETUP_DATA = {
     'tsunami': {
         'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/tsunamis/events',
-        'output_file': 'tsunami.csv'
+        'url-causes': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/descriptors/tsunami/causes',
+        'url-validity': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/descriptors/tsunami/validity',
+        'url-regions': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/descriptors/tsunami/regions',
+        'url-warning-status': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/descriptors/tsunami/warning-statuses',
+        'output_file': 'tsunami.csv',
+        'database': 'elasticsearch'
     },
     'earthquake': {
         'url': 'https://www.ngdc.noaa.gov/hazel/hazard-service/api/v1/earthquakes',

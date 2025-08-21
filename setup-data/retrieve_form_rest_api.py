@@ -138,7 +138,7 @@ def retrieve_data(url, output_file='', write_down=True):
         items += data['items']
         num_pages = data['totalPages']
         i += 1
-
+    print()
     del data, response
 
     # 4. Converte in DataFrame e mostra un'anteprima
@@ -186,6 +186,30 @@ def setup_earthquakes():
 
     print("\nEarthquakes retrieved and converted to csv")
 
+def setup_tsunami():
+    df_tsunami = retrieve_data(get_url_from_setup('tsunami'), write_down=False)
+    df_regions = retrieve_data(SETUP_DATA['tsunami']['url-regions'], write_down=False)
+    df_causes = retrieve_data(SETUP_DATA['tsunami']['url-causes'], write_down=False)
+    df_validity = retrieve_data(SETUP_DATA['tsunami']['url-validity'], write_down=False)
+    df_warnings = retrieve_data(SETUP_DATA['tsunami']['url-warning-status'], write_down=False)
+    df_tsunami.with_columns(pl.col("regionCode").cast(pl.Utf8)) \
+        .join(df_regions, left_on='regionCode', right_on="id") \
+        .rename({"description": "regionName"}) \
+        .with_columns(pl.col("causeCode").cast(pl.Utf8)) \
+        .join(df_causes, left_on='causeCode', right_on="id") \
+        .rename({"description": "cause"}) \
+        .with_columns(pl.col("eventValidity").cast(pl.Utf8)) \
+        .join(df_validity, left_on='eventValidity', right_on="id") \
+        .rename({"description": "validity"}) \
+        .with_columns(pl.col("warningStatusId").cast(pl.Utf8)) \
+        .join(df_warnings, left_on='warningStatusId', right_on="id") \
+        .rename({"description": "warningStatus"}) \
+        .write_csv(get_output_filename_from_setup('tsunami'))
+    print("\nTsunamis retrieved and converted to csv")
+
+
+
+
 
 
 def setup_tornadoes():
@@ -227,6 +251,8 @@ def setup(url_idx):
         setup_volcano()
     elif url_idx == 'tornado':
         setup_tornadoes()
+    elif url_idx == 'tsunami':
+        setup_tsunami()
 
 
 

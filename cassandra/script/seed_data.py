@@ -45,6 +45,127 @@ class CassandraLoader():
         except Exception as e:
             self.logger.error(f"error during connection closing: {e}")
 
+    def create_indexes(self):
+        """
+        Crea gli indici secondari per migliorare le performance delle query
+        """
+        try:
+            # Indici per earthquakes_by_country
+            self.logger.info("Creating indexes for earthquakes_by_country...")
+
+            # Indice su year per query temporali
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_country_year
+                                     ON earthquakes_by_country (year);
+                                 """)
+            self.logger.info("Created index idx_country_year")
+
+            # Indice su locationName per ricerche geografiche
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_country_location
+                                     ON earthquakes_by_country (locationName);
+                                 """)
+            self.logger.info("Created index idx_country_location")
+
+            # Indice su eqMagnitude per filtrare per magnitudo
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_country_magnitude
+                                     ON earthquakes_by_country (eqMagnitude);
+                                 """)
+            self.logger.info("Created index idx_country_magnitude")
+
+            # Indice su regionName per query regionali
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_country_region
+                                     ON earthquakes_by_country (regionName);
+                                 """)
+            self.logger.info("Created index idx_country_region")
+
+            # Indici per earthquakes_by_magnitude
+            self.logger.info("Creating indexes for earthquakes_by_magnitude...")
+
+            # Indice su country per filtrare per paese
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_magnitude_country
+                                     ON earthquakes_by_magnitude (country);
+                                 """)
+            self.logger.info("Created index idx_magnitude_country")
+
+            # Indice su year per query temporali
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_magnitude_year
+                                     ON earthquakes_by_magnitude (year);
+                                 """)
+            self.logger.info("Created index idx_magnitude_year")
+
+            # Indice su intensity per correlazioni magnitudo-intensità
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_magnitude_intensity
+                                     ON earthquakes_by_magnitude (intensity);
+                                 """)
+            self.logger.info("Created index idx_magnitude_intensity")
+
+            # Indici per earthquakes_by_damage
+            self.logger.info("Creating indexes for earthquakes_by_damage...")
+
+            # Indice su country per analisi danni per paese
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_damage_country
+                                     ON earthquakes_by_damage (country);
+                                 """)
+            self.logger.info("Created index idx_damage_country")
+
+            # Indice su year per analisi temporali dei danni
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_damage_year
+                                     ON earthquakes_by_damage (year);
+                                 """)
+            self.logger.info("Created index idx_damage_year")
+
+            # Indice su eqMagnitude per correlazioni magnitudo-danni
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_damage_magnitude
+                                     ON earthquakes_by_damage (eqMagnitude);
+                                 """)
+            self.logger.info("Created index idx_damage_magnitude")
+
+            # Indici per earthquakes_by_total_damage
+            self.logger.info("Creating indexes for earthquakes_by_total_damage...")
+
+            # Indice su country per analisi danni totali per paese
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_total_damage_country
+                                     ON earthquakes_by_total_damage (country);
+                                 """)
+            self.logger.info("Created index idx_total_damage_country")
+
+            # Indice su year per analisi temporali danni totali
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_total_damage_year
+                                     ON earthquakes_by_total_damage (year);
+                                 """)
+            self.logger.info("Created index idx_total_damage_year")
+
+            # Indice su tsunamiEventId per eventi correlati a tsunami
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_total_damage_tsunami
+                                     ON earthquakes_by_total_damage (tsunamiEventId);
+                                 """)
+            self.logger.info("Created index idx_total_damage_tsunami")
+
+            # Indice su volcanoEventId per eventi correlati a vulcani
+            self.session.execute("""
+                                 CREATE INDEX IF NOT EXISTS idx_total_damage_volcano
+                                     ON earthquakes_by_total_damage (volcanoEventId);
+                                 """)
+            self.logger.info("Created index idx_total_damage_volcano")
+
+            self.logger.info("All indexes created successfully!")
+
+        except Exception as e:
+            self.logger.error(f"Error creating indexes: {e}")
+            raise
+
     def insert_data(self, input_file):
 
         df = pl.read_csv(input_file) \
@@ -393,6 +514,7 @@ class CassandraLoader():
         self.create_keyspace(keyspace)
         self.create_tables()
         self.insert_data(input_file)
+        self.create_indexes()
         self.close()
         self.logger.info("Finished loading")
 
