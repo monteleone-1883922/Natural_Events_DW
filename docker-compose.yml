@@ -160,8 +160,8 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      discovery.type: single-node
-      xpack.security.enabled: false
+      - discovery.type=single-node
+      - xpack.security.enabled=false
     volumes:
       - ./elasticsearch/data:/usr/share/elasticsearch/data
     depends_on:
@@ -184,9 +184,9 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      kibana_seed:
+      elasticsearch_seed:
         condition: service_completed_successfully
-  kibana_seed:
+  elasticsearch_seed:
     container_name: elasticsearch-seed
     build:
       context: ./elasticsearch/script
@@ -200,8 +200,12 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       DATA_SOURCE_PATH: /app/data/tsunami.csv
     volumes:
-      - ./elasticsearch/data:/app
+      - ./elasticsearch/data:/app/data
       - ./elasticsearch/script/seed_data.py:/app/seed_data.py
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: "no"
 
 
 

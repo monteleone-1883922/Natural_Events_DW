@@ -10,7 +10,7 @@ MAPPING = {
         "properties": {
             "id": {"type": "integer"},
             "eventDate": {"type": "date"},
-            "eventValidity": {"type": "boolean"},
+            "eventValidity": {"type": "keyword"},
             "causeCode": {"type": "keyword"},
             "earthquakeEventId": {"type": "keyword"},
             "volcanoEventId": {"type": "keyword"},
@@ -41,7 +41,7 @@ MAPPING = {
             "damageMillionsDollarsTotal": {"type": "float"},
             "numRunups": {"type": "integer"},
             "numDeposits": {"type": "integer"},
-            "area": {"type": "float"},
+            "area": {"type": "keyword"},
             "publish": {"type": "boolean"},
             "oceanicTsunami": {"type": "boolean"},
             "warningStatusId": {"type": "keyword"},
@@ -68,7 +68,7 @@ def row_to_doc(row):
     return {
         "id": row["id"],
         "eventDate": event_date,
-        "eventValidity": row.get("eventValidity", 0),
+        "eventValidity": row.get("eventValidity"),
         "causeCode": row.get("causeCode"),
         "earthquakeEventId": row.get("earthquakeEventId"),
         "volcanoEventId": row.get("volcanoEventId"),
@@ -105,25 +105,28 @@ def row_to_doc(row):
         "cause": row.get("cause"),
         "validity": row.get("validity"),
         "warningStatus": row.get("warningStatus"),
-        "publish": row.get("publish", 0),
-        "oceanicTsunami": row.get("oceanicTsunami", 0)
+        "publish": row.get("publish", False),
+        "oceanicTsunami": row.get("oceanicTsunami", False)
     }
 
 
 class ElasticSearchLoader:
 
     def __init__(self, url, logger):
+        self.index_name = None
         self.es = Elasticsearch(url)
         self.logger = logger
 
     def create_index(self, index_name):
-        if not self.es.indices.exists(index=index_name):
-            self.es.indices.create(index=index_name, body=MAPPING)
+        if self.es.indices.exists(index=index_name):
+            self.es.indices.delete(index=index_name, ignore_unavailable=True)
+        self.es.indices.create(index=index_name, body=MAPPING)
         self.index_name = index_name
 
 
     def load_data(self, filename):
         df = pl.read_csv(filename)
+        self.logger.info(f"Storing {df.height} records")
         actions = [
             {
                 "_index": self.index_name,
@@ -132,9 +135,27 @@ class ElasticSearchLoader:
             }
             for r in df.to_dicts()
         ]
+        self.logger.info(f"actions number: {len(actions)}")
 
-        helpers.bulk(self.es, actions)
-        self.logger.info(f"inserted {len(actions)} documents in {self.index_name}")
+        try:
+            helpers.bulk(self.es, actions)
+            self.logger.info(f"inserted {len(actions)} documents in {self.index_name}")
+        except helpers.BulkIndexError as e:
+            self.logger.error(f"BulkIndexError: {len(e.errors)} document(s) failed to index.")
+            # Log dettagliato dei primi errori
+            for i, error in enumerate(e.errors[:10]):  # Primi 10 errori
+                self.logger.error(f"Error {i + 1}:")
+                self.logger.error(f"  Document ID: {error.get('index', {}).get('_id', 'unknown')}")
+                self.logger.error(f"  Error type: {error.get('index', {}).get('error', {}).get('type', 'unknown')}")
+                self.logger.error(f"  Error reason: {error.get('index', {}).get('error', {}).get('reason', 'unknown')}")
+                if 'caused_by' in error.get('index', {}).get('error', {}):
+                    caused_by = error['index']['error']['caused_by']
+                    self.logger.error(
+                        f"  Caused by: {caused_by.get('type', 'unknown')} - {caused_by.get('reason', 'unknown')}")
+
+            # Non rilanciare l'errore, così puoi vedere almeno quelli che sono andati a buon fine
+            successful_docs = len(actions) - len(e.errors)
+            self.logger.info(f"Successfully indexed {successful_docs} out of {len(actions)} documents")
 
     def close(self):
         self.es.close()
@@ -155,7 +176,7 @@ if __name__ == "__main__":
 
 
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("Elasticsearch Loader")
     loader = ElasticSearchLoader(URL, logger)
     loader.load(FILE_PATH, INDEX_NAME)
 
