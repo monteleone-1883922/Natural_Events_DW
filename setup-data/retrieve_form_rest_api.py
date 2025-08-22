@@ -179,7 +179,7 @@ def setup_earthquakes():
     df_regions = retrieve_data(SETUP_DATA['earthquake']['url-regions'], write_down=False)
     df_earthquake.filter(pl.col("id").is_not_null()) \
         .with_columns(pl.col("regionCode").cast(pl.Utf8)) \
-        .join(df_regions, left_on="regionCode", right_on="id") \
+        .join(df_regions, left_on="regionCode", right_on="id", how='left') \
         .rename({"description": "regionName"}) \
         .drop(["regionCode"]) \
         .write_csv(get_output_filename_from_setup('earthquake'))
@@ -193,16 +193,16 @@ def setup_tsunami():
     df_validity = retrieve_data(SETUP_DATA['tsunami']['url-validity'], write_down=False)
     df_warnings = retrieve_data(SETUP_DATA['tsunami']['url-warning-status'], write_down=False)
     df_tsunami.with_columns(pl.col("regionCode").cast(pl.Utf8)) \
-        .join(df_regions, left_on='regionCode', right_on="id") \
+        .join(df_regions, left_on='regionCode', right_on="id", how='left') \
         .rename({"description": "regionName"}) \
         .with_columns(pl.col("causeCode").cast(pl.Utf8)) \
-        .join(df_causes, left_on='causeCode', right_on="id") \
+        .join(df_causes, left_on='causeCode', right_on="id", how='left') \
         .rename({"description": "cause"}) \
         .with_columns(pl.col("eventValidity").cast(pl.Utf8)) \
-        .join(df_validity, left_on='eventValidity', right_on="id") \
+        .join(df_validity, left_on='eventValidity', right_on="id", how='left') \
         .rename({"description": "validity"}) \
         .with_columns(pl.col("warningStatusId").cast(pl.Utf8)) \
-        .join(df_warnings, left_on='warningStatusId', right_on="id") \
+        .join(df_warnings, left_on='warningStatusId', right_on="id", how='left') \
         .rename({"description": "warningStatus"}) \
         .write_csv(get_output_filename_from_setup('tsunami'))
     print("\nTsunamis retrieved and converted to csv")

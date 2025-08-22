@@ -7,6 +7,8 @@ services:
     volumes:
       - ./neo4j/data:/neo4j/data
       - ./mongodb/data:/mongodb/data
+      - ./cassandra/data:/cassandra/data
+      - ./elasticsearch/data:/elasticsearch/data
   neo4j:
     image: neo4j:5.26
     container_name: neo4j
@@ -169,7 +171,7 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
-      interval: 30s
+      interval: 20s
       timeout: 10s
       retries: 5
       start_period: 30s
@@ -206,6 +208,31 @@ services:
       elasticsearch:
         condition: service_healthy
     restart: "no"
+  nifi:
+    image: apache/nifi:2.5.0
+    container_name: nifi
+    ports:
+      - "8443:8443"   # interfaccia web
+      - "10000:10000" # porta remota per flussi, opzionale
+    environment:
+      NIFI_SENSITIVE_PROPS_KEY: "password123456"
+      NIFI_SECURITY_ENABLE: "false"
+      SINGLE_USER_CREDENTIALS_USERNAME: "nifi"
+      SINGLE_USER_CREDENTIALS_PASSWORD: "password1234567890"
+    volumes:
+      - ./nifi/state:/opt/nifi/nifi-current/state
+      - ./nifi/database_repository:/opt/nifi/nifi-current/database_repository
+#      - ./nifi/conf:/opt/nifi/nifi-current/conf
+#    depends_on:
+#      elasticsearch_seed:
+#        condition: service_completed_successfully
+#      cassandra_seed:
+#        condition: service_completed_successfully
+#      mongodb_seed:
+#        condition: service_completed_successfully
+#      neo4j_seed:
+#        condition: service_completed_successfully
+
 
 
 

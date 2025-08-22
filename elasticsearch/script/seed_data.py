@@ -1,6 +1,6 @@
 import polars as pl
 from elasticsearch import Elasticsearch, helpers
-import datetime
+import calendar
 import os
 import logging
 
@@ -55,14 +55,33 @@ MAPPING = {
 
 def row_to_doc(row):
 
-    event_date = datetime.datetime(
-        int(row["year"]),
-        int(row.get("month", 1) or 1),
-        int(row.get("day", 1) or 1),
-        int(row.get("hour", 0) or 0),
-        int(row.get("minute", 0) or 0),
-        int(row.get("second", 0) or 0)
-    ).isoformat()
+    year = row["year"]
+    month = row.get("month", 1)
+    day = row.get("day", 1)
+    hour = row.get("hour", 0)
+    minute = row.get("minute", 0)
+    sec = row.get("second", 0)
+    max_day = calendar.monthrange(year if year > 0 else 1, month)[1]
+    if day > max_day:
+        day = max_day
+
+    if year < 0:
+        year_str = f"-{abs(year):04d}"
+    else:
+        year_str = f"{year:04d}"
+
+    sec_int = int(sec)
+    sec_frac = sec - sec_int
+
+    if sec_frac > 0:
+        # arrotonda a millisecondi
+        ms = int(round(sec_frac * 1000))
+        second_str = f"{sec_int:02d}.{ms:03d}"
+    else:
+        second_str = f"{sec_int:02d}"
+
+    event_date = (f"{year_str}-{month:02d}-{day:02d}T" +
+                  f"{hour:02d}:{minute:02d}:{second_str}Z")
 
 
     return {
@@ -78,7 +97,7 @@ def row_to_doc(row):
         "geoLocation": {
             "lat": row["latitude"],
             "lon": row["longitude"]
-        },
+        } if row["latitude"] is not None and row["longitude"] is not None else None,
         "eqMagnitude": row.get("eqMagnitude"),
         "eqDepth": row.get("eqDepth"),
         "maxWaterHeight": row.get("maxWaterHeight"),
@@ -125,7 +144,14 @@ class ElasticSearchLoader:
 
 
     def load_data(self, filename):
-        df = pl.read_csv(filename)
+        df = pl.read_csv(filename).with_columns([
+            pl.col("month").cast(pl.Int32).fill_null(1),
+            pl.col("day").cast(pl.Int32).fill_null(1),
+            pl.col("hour").cast(pl.Int32).fill_null(0),
+            pl.col("minute").cast(pl.Int32).fill_null(0),
+            pl.col("second").cast(pl.Float32).fill_null(0)
+        ])
+        self.logger.info(f"Schema is {df.schema}")
         self.logger.info(f"Storing {df.height} records")
         actions = [
             {
@@ -133,9 +159,8 @@ class ElasticSearchLoader:
                 "_id": str(r["id"]),
                 "_source": row_to_doc(r)
             }
-            for r in df.to_dicts()
+            for r in df.iter_rows(named=True)
         ]
-        self.logger.info(f"actions number: {len(actions)}")
 
         try:
             helpers.bulk(self.es, actions)
@@ -176,7 +201,7 @@ if __name__ == "__main__":
 
 
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger("Elasticsearch Loader")
+    logger = logging.getLogger("ElasticsearchLoader")
     loader = ElasticSearchLoader(URL, logger)
     loader.load(FILE_PATH, INDEX_NAME)
 

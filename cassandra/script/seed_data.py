@@ -194,7 +194,7 @@ class CassandraLoader():
                 pl.col("damageMillionsDollarsTotal").cast(pl.Float32),
                 pl.col("eqMagMb").cast(pl.Float64),
             ])
-        self.logger.info("Schema is ", df.schema)
+        self.logger.info(f"Schema is {df.schema}")
 
         insert_earthquakes_by_country = self.session.prepare("""
                  INSERT INTO earthquakes_by_country (country, year, month,
