@@ -214,34 +214,22 @@ services:
       elasticsearch:
         condition: service_healthy
     restart: "no"
-  postgres:
+  airbyte-db:
     image: postgres:17
-    container_name: target_postgres
+    container_name: airbyte_db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password1234
-      POSTGRES_DB: integration_db
-      POSTGRES_HOST_AUTH_METHOD: md5
-      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=trust"
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: airbyte
+      POSTGRES_PASSWORD: airbyte
+      POSTGRES_DB: airbyte
     volumes:
-      - ./postgres/data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d integration_db" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-  airbyte-server:
-    image: airbyte/server:1.8.1
-    container_name: airbyte-server
-    environment:
-      - DATABASE_USER=user
-      - DATABASE_PASSWORD=password1234
-      - DATABASE_URL=jdbc:postgresql://postgres:5432/integration_db
-      - TEMPORAL_HOST=airbyte-temporal:7233
+      - ./airbyte/data:/var/lib/postgresql/data
     ports:
-      - "8001:8001"
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U airbyte -d airbyte" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
@@ -261,14 +249,43 @@ services:
         condition: service_completed_successfully
       elasticsearch_seed:
         condition: service_completed_successfully
+  postgres-staging:
+    image: postgres:17
+    container_name: target_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password1234
+      POSTGRES_DB: integration_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d integration_db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  airbyte-server:
+    image: airbyte/server:1.8.1
+    container_name: airbyte-server
+    environment:
+      - DATABASE_USER=airbyte
+      - DATABASE_PASSWORD=airbyte
+      - DATABASE_URL=jdbc:postgresql://airbyte-db:5432/airbyte
+    ports:
+      - "8001:8001"
+    depends_on:
+      airbyte-db:
+        condition: service_healthy
   airbyte-worker:
     image: airbyte/worker:1.8.1
     container_name: airbyte-worker
     environment:
-      - DATABASE_USER=user
-      - DATABASE_PASSWORD=password1234
-      - DATABASE_URL=jdbc:postgresql://postgres:5432/integration_db
-      - TEMPORAL_HOST=airbyte-temporal:7233
+      - DATABASE_USER=airbyte
+      - DATABASE_PASSWORD=airbyte
+      - DATABASE_URL=jdbc:postgresql://airbyte-db:5432/airbyte
+      - AIRBYTE_SERVER_HOST=airbyte-server
+      - AIRBYTE_SERVER_PORT=8001
     depends_on:
       - airbyte-server
   airbyte-webapp:
@@ -286,9 +303,9 @@ services:
     image: airbyte/bootloader:1.8.1
     container_name: airbyte-bootloader
     environment:
-      - DATABASE_USER=user
-      - DATABASE_PASSWORD=password1234
-      - DATABASE_URL=jdbc:postgresql://postgres:5432/integration_db
+      - DATABASE_USER=airbyte
+      - DATABASE_PASSWORD=airbyte
+      - DATABASE_URL=jdbc:postgresql://airbyte-db:5432/airbyte
     depends_on:
       - airbyte-webapp
   dbt:
