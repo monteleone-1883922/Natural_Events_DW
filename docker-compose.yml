@@ -1,6 +1,6 @@
-version: '3.9'
 services:
   data-setup:
+    container_name: data-setup
     build:
       context: setup-data
       dockerfile: Dockerfile
@@ -59,6 +59,8 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
+      neo4j_seed:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
@@ -113,6 +115,8 @@ services:
       - ./cassandra/data:/var/lib/cassandra/data
     depends_on:
       data-setup:
+        condition: service_completed_successfully
+      mongodb_seed:
         condition: service_completed_successfully
     healthcheck:
       test: [ "CMD-SHELL", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' || exit 1" ]
@@ -169,6 +173,8 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
+      cassandra_seed:
+        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
       interval: 20s
@@ -208,21 +214,106 @@ services:
       elasticsearch:
         condition: service_healthy
     restart: "no"
-  nifi:
-    image: apache/nifi:2.5.0
-    container_name: nifi
-    ports:
-      - "8443:8443"   # interfaccia web
-      - "10000:10000" # porta remota per flussi, opzionale
+  postgres:
+    image: postgres:17
+    container_name: target_postgres
     environment:
-      NIFI_SENSITIVE_PROPS_KEY: "password123456"
-      NIFI_SECURITY_ENABLE: "false"
-      SINGLE_USER_CREDENTIALS_USERNAME: "nifi"
-      SINGLE_USER_CREDENTIALS_PASSWORD: "password1234567890"
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password1234
+      POSTGRES_DB: integration_db
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=trust"
+    ports:
+      - "5432:5432"
     volumes:
-      - ./nifi/state:/opt/nifi/nifi-current/state
-      - ./nifi/database_repository:/opt/nifi/nifi-current/database_repository
-#      - ./nifi/conf:/opt/nifi/nifi-current/conf
+      - ./postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d integration_db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  airbyte-server:
+    image: airbyte/server:1.8.1
+    container_name: airbyte-server
+    environment:
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password1234
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/integration_db
+      - TEMPORAL_HOST=airbyte-temporal:7233
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      mongodb_seed:
+        condition: service_completed_successfully
+      cassandra_seed:
+        condition: service_completed_successfully
+      neo4j_seed:
+        condition: service_completed_successfully
+      elasticsearch_seed:
+        condition: service_completed_successfully
+  airbyte-worker:
+    image: airbyte/worker:1.8.1
+    container_name: airbyte-worker
+    environment:
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password1234
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/integration_db
+      - TEMPORAL_HOST=airbyte-temporal:7233
+    depends_on:
+      - airbyte-server
+  airbyte-webapp:
+    image: airbyte/webapp:1.7.2
+    container_name: airbyte-webapp
+    ports:
+      - "8000:8000"
+    environment:
+      - AIRBYTE_ROLE=webapp
+      - AIRBYTE_SERVER_HOST=airbyte-server
+      - AIRBYTE_SERVER_PORT=8001
+    depends_on:
+      - airbyte-worker
+  airbyte-bootloader:
+    image: airbyte/bootloader:1.8.1
+    container_name: airbyte-bootloader
+    environment:
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password1234
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/integration_db
+    depends_on:
+      - airbyte-webapp
+  dbt:
+    image: xemuliam/dbt:1.10-databricks
+    container_name: dbt_transform
+    volumes:
+      - ./dbt:/usr/app
+    working_dir: /usr/app
+    entrypoint: [ "dbt" ]
+    depends_on:
+      - postgres
+  ontop:
+    image: ontop/ontop:5.3.0
+    container_name: ontop_server
+    ports:
+      - "8085:8080"
+    volumes:
+      - ./ontop:/opt/ontop/config
+    command: >
+      /opt/ontop/ontop endpoint
+      --mapping=/opt/ontop/config/mapping.obda
+      --ontology=/opt/ontop/config/ontology.owl
+      --properties=/opt/ontop/config/ontop.properties
+    depends_on:
+      - postgres
 #    depends_on:
 #      elasticsearch_seed:
 #        condition: service_completed_successfully

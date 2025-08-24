@@ -243,6 +243,7 @@ def setup(url_idx):
         print("Invalid URL index.")
         print("Valid indices:", list(SETUP_DATA.keys()))
         sys.exit(1)
+    print(f"--- STARTING RETRIEVING {url_idx} ---")
     if url_idx == 'earthquake':
         setup_earthquakes()
     elif url_idx == 'county':
