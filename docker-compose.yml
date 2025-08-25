@@ -10,7 +10,7 @@ services:
       - ./cassandra/data:/cassandra/data
       - ./elasticsearch/data:/elasticsearch/data
   neo4j:
-    image: neo4j:5.26
+    image: neo4j:5.26-community
     container_name: neo4j
     restart: unless-stopped
     ports:
@@ -35,7 +35,7 @@ services:
       timeout: 20s
       retries: 15
   neo4j_seed:
-    image: neo4j:5.26
+    image: neo4j:5.26-community
     container_name: neo4j-seed
     depends_on:
       neo4j:
@@ -45,7 +45,7 @@ services:
       - ./neo4j/data:/var/lib/neo4j/import
     entrypoint: [ "bash", "/init/init.sh" ]
   mongodb:
-    image: mongo:8.0.11
+    image: mongo:8.0-rc-jammy
     container_name: mongodb
     restart: unless-stopped
     ports:
@@ -59,8 +59,8 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
-      neo4j_seed:
-        condition: service_completed_successfully
+#      neo4j_seed:
+#        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
@@ -68,7 +68,7 @@ services:
       retries: 5
       start_period: 30s
   mongo-express:
-    image: mongo-express:1.0.2
+    image: mongo-express:latest-alpine
     container_name: mongo-express
     restart: unless-stopped
     ports:
@@ -102,7 +102,7 @@ services:
         condition: service_healthy
     restart: "no"
   cassandra:
-    image: cassandra:5.0
+    image: cassandra:5.0-jammy
     container_name: cassandra
     restart: unless-stopped
     ports:
@@ -116,8 +116,8 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
-      mongodb_seed:
-        condition: service_completed_successfully
+#      mongodb_seed:
+#        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD-SHELL", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' || exit 1" ]
       interval: 20s
@@ -173,8 +173,8 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
-      cassandra_seed:
-        condition: service_completed_successfully
+#      cassandra_seed:
+#        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
       interval: 20s
@@ -214,43 +214,9 @@ services:
       elasticsearch:
         condition: service_healthy
     restart: "no"
-  airbyte-db:
-    image: postgres:17
-    container_name: airbyte_db
-    environment:
-      POSTGRES_USER: airbyte
-      POSTGRES_PASSWORD: airbyte
-      POSTGRES_DB: airbyte
-    volumes:
-      - ./airbyte/data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U airbyte -d airbyte" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    depends_on:
-      postgres:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-      cassandra:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-      neo4j:
-        condition: service_healthy
-      mongodb_seed:
-        condition: service_completed_successfully
-      cassandra_seed:
-        condition: service_completed_successfully
-      neo4j_seed:
-        condition: service_completed_successfully
-      elasticsearch_seed:
-        condition: service_completed_successfully
+
   postgres-staging:
-    image: postgres:17
+    image: postgres:17-alpine
     container_name: target_postgres
     environment:
       POSTGRES_USER: user
@@ -265,49 +231,44 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-  airbyte-server:
-    image: airbyte/server:1.8.1
-    container_name: airbyte-server
-    environment:
-      - DATABASE_USER=airbyte
-      - DATABASE_PASSWORD=airbyte
-      - DATABASE_URL=jdbc:postgresql://airbyte-db:5432/airbyte
+  hop:
+    image: apache/hop:2.15.0
+    container_name: apache_hop
     ports:
-      - "8001:8001"
-    depends_on:
-      airbyte-db:
-        condition: service_healthy
-  airbyte-worker:
-    image: airbyte/worker:1.8.1
-    container_name: airbyte-worker
+      - "8086:8080"
+    volumes:
+      - ./hop:/project
+      - ./hop/hop-server.xml:/usr/local/tomcat/webapps/hop/config/hop-server.xml
     environment:
-      - DATABASE_USER=airbyte
-      - DATABASE_PASSWORD=airbyte
-      - DATABASE_URL=jdbc:postgresql://airbyte-db:5432/airbyte
-      - AIRBYTE_SERVER_HOST=airbyte-server
-      - AIRBYTE_SERVER_PORT=8001
-    depends_on:
-      - airbyte-server
-  airbyte-webapp:
-    image: airbyte/webapp:1.7.2
-    container_name: airbyte-webapp
-    ports:
-      - "8000:8000"
-    environment:
-      - AIRBYTE_ROLE=webapp
-      - AIRBYTE_SERVER_HOST=airbyte-server
-      - AIRBYTE_SERVER_PORT=8001
-    depends_on:
-      - airbyte-worker
-  airbyte-bootloader:
-    image: airbyte/bootloader:1.8.1
-    container_name: airbyte-bootloader
-    environment:
-      - DATABASE_USER=airbyte
-      - DATABASE_PASSWORD=airbyte
-      - DATABASE_URL=jdbc:postgresql://airbyte-db:5432/airbyte
-    depends_on:
-      - airbyte-webapp
+      HOP_PROJECT_DIRECTORY: /project
+      HOP_PROJECT_NAME: project
+      HOP_SERVER_USER: admin
+      HOP_SERVER_PASS: password1234
+      HOP_DATABASE_HOST: target_postgres
+      HOP_DATABASE_PORT: 5432
+      HOP_DATABASE_NAME: integration_db
+      HOP_DATABASE_USER: user
+      HOP_DATABASE_PASSWORD: password1234
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      elasticsearch:
+#        condition: service_healthy
+#      cassandra:
+#        condition: service_healthy
+#      mongodb:
+#        condition: service_healthy
+#      neo4j:
+#        condition: service_healthy
+#      mongodb_seed:
+#        condition: service_completed_successfully
+#      cassandra_seed:
+#        condition: service_completed_successfully
+#      neo4j_seed:
+#        condition: service_completed_successfully
+#      elasticsearch_seed:
+#        condition: service_completed_successfully
+#    restart: always
   dbt:
     image: xemuliam/dbt:1.10-databricks
     container_name: dbt_transform
@@ -315,8 +276,8 @@ services:
       - ./dbt:/usr/app
     working_dir: /usr/app
     entrypoint: [ "dbt" ]
-    depends_on:
-      - postgres
+#    depends_on:
+#      - postgres
   ontop:
     image: ontop/ontop:5.3.0
     container_name: ontop_server
@@ -329,8 +290,8 @@ services:
       --mapping=/opt/ontop/config/mapping.obda
       --ontology=/opt/ontop/config/ontology.owl
       --properties=/opt/ontop/config/ontop.properties
-    depends_on:
-      - postgres
+#    depends_on:
+#      - postgres
 #    depends_on:
 #      elasticsearch_seed:
 #        condition: service_completed_successfully
