@@ -48,7 +48,6 @@
       <logext>log</logext>
       <logfile>start_retrieve_data</logfile>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>Y</set_append_logfile>
       <set_logfile>Y</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
@@ -71,10 +70,7 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/start_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
@@ -123,6 +119,29 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
       <insertScript>N</insertScript>
+      <loglevel>Basic</loglevel>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>880</xloc>
+      <yloc>224</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>load_on_cassandra</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>cassandra_seed</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/start_container.sh</filename>
+      <insertScript>N</insertScript>
       <logext/>
       <logfile/>
       <loglevel>Basic</loglevel>
@@ -132,7 +151,246 @@
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
       <xloc>880</xloc>
-      <yloc>224</yloc>
+      <yloc>320</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>load_on_mongodb</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>mongodb_seed</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/start_container.sh</filename>
+      <insertScript>N</insertScript>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <script/>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>368</xloc>
+      <yloc>400</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>load_on_elasticsearch</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>elasticsearch_seed</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/start_container.sh</filename>
+      <insertScript>N</insertScript>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <script/>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>880</xloc>
+      <yloc>480</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>staging_cassandra</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <clear_files>N</clear_files>
+      <clear_rows>N</clear_rows>
+      <create_parent_folder>N</create_parent_folder>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/pipelines/cassandra_staging.hpl</filename>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <params_from_previous>N</params_from_previous>
+      <run_configuration>local</run_configuration>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <wait_until_finished>Y</wait_until_finished>
+      <parallel>N</parallel>
+      <xloc>576</xloc>
+      <yloc>320</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>staging_mongodb</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <clear_files>N</clear_files>
+      <clear_rows>N</clear_rows>
+      <create_parent_folder>N</create_parent_folder>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/pipelines/mongoDB_staging.hpl</filename>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <params_from_previous>N</params_from_previous>
+      <run_configuration>local</run_configuration>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <wait_until_finished>Y</wait_until_finished>
+      <parallel>N</parallel>
+      <xloc>576</xloc>
+      <yloc>400</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>staging_elasticsearch</name>
+      <description/>
+      <type>PIPELINE</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <clear_files>N</clear_files>
+      <clear_rows>N</clear_rows>
+      <create_parent_folder>N</create_parent_folder>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/pipelines/elasticsearch_staging.hpl</filename>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <parameters>
+        <pass_all_parameters>Y</pass_all_parameters>
+      </parameters>
+      <params_from_previous>N</params_from_previous>
+      <run_configuration>local</run_configuration>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <wait_until_finished>Y</wait_until_finished>
+      <parallel>N</parallel>
+      <xloc>576</xloc>
+      <yloc>480</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>stop_cassandra</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>cassandra</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
+      <insertScript>N</insertScript>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <script/>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>368</xloc>
+      <yloc>320</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>stop_mongodb</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>mongodb</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
+      <insertScript>N</insertScript>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <script/>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>880</xloc>
+      <yloc>400</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>stop_elasticsearch</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>elasticsearch</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
+      <insertScript>N</insertScript>
+      <logext/>
+      <logfile/>
+      <loglevel>Basic</loglevel>
+      <script/>
+      <set_append_logfile>N</set_append_logfile>
+      <set_logfile>N</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>368</xloc>
+      <yloc>480</yloc>
+      <attributes_hac/>
+    </action>
+    <action>
+      <name>retrieve_data 2</name>
+      <description/>
+      <type>SHELL</type>
+      <attributes/>
+      <add_date>Y</add_date>
+      <add_time>Y</add_time>
+      <arg_from_previous>N</arg_from_previous>
+      <arguments>
+        <argument>data-setup</argument>
+      </arguments>
+      <exec_per_row>N</exec_per_row>
+      <filename>${PROJECT_HOME}/script/start_container.sh</filename>
+      <insertScript>N</insertScript>
+      <logext>log</logext>
+      <logfile>start_retrieve_data</logfile>
+      <loglevel>Basic</loglevel>
+      <set_append_logfile>Y</set_append_logfile>
+      <set_logfile>Y</set_logfile>
+      <work_directory>${PROJECT_HOME}/script</work_directory>
+      <parallel>N</parallel>
+      <xloc>1104</xloc>
+      <yloc>320</yloc>
       <attributes_hac/>
     </action>
   </actions>
@@ -161,6 +419,48 @@
     <hop>
       <from>staging_neo4j</from>
       <to>stop_neo4j</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>load_on_cassandra</from>
+      <to>staging_cassandra</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>load_on_mongodb</from>
+      <to>staging_mongodb</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>load_on_elasticsearch</from>
+      <to>staging_elasticsearch</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>staging_cassandra</from>
+      <to>stop_cassandra</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>staging_mongodb</from>
+      <to>stop_mongodb</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>staging_elasticsearch</from>
+      <to>stop_elasticsearch</to>
       <enabled>Y</enabled>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
