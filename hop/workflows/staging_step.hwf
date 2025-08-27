@@ -26,9 +26,9 @@
       <repeat>N</repeat>
       <schedulerType>0</schedulerType>
       <weekDay>1</weekDay>
-      <parallel>N</parallel>
-      <xloc>288</xloc>
-      <yloc>224</yloc>
+      <parallel>Y</parallel>
+      <xloc>240</xloc>
+      <yloc>128</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -52,8 +52,8 @@
       <set_logfile>Y</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>432</xloc>
-      <yloc>224</yloc>
+      <xloc>592</xloc>
+      <yloc>128</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -75,8 +75,8 @@
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>576</xloc>
-      <yloc>224</yloc>
+      <xloc>752</xloc>
+      <yloc>128</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -101,8 +101,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>736</xloc>
-      <yloc>224</yloc>
+      <xloc>912</xloc>
+      <yloc>128</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -124,8 +124,8 @@
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>880</xloc>
-      <yloc>224</yloc>
+      <xloc>1088</xloc>
+      <yloc>128</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -142,15 +142,12 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/start_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>880</xloc>
+      <xloc>1088</xloc>
       <yloc>320</yloc>
       <attributes_hac/>
     </action>
@@ -168,16 +165,13 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/start_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
       <xloc>368</xloc>
-      <yloc>400</yloc>
+      <yloc>464</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -194,16 +188,13 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/start_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>880</xloc>
-      <yloc>480</yloc>
+      <xloc>1088</xloc>
+      <yloc>608</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -218,8 +209,6 @@
       <create_parent_folder>N</create_parent_folder>
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/pipelines/cassandra_staging.hpl</filename>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
       <parameters>
         <pass_all_parameters>Y</pass_all_parameters>
@@ -230,7 +219,7 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>576</xloc>
+      <xloc>688</xloc>
       <yloc>320</yloc>
       <attributes_hac/>
     </action>
@@ -246,8 +235,6 @@
       <create_parent_folder>N</create_parent_folder>
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/pipelines/mongoDB_staging.hpl</filename>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
       <parameters>
         <pass_all_parameters>Y</pass_all_parameters>
@@ -258,8 +245,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>576</xloc>
-      <yloc>400</yloc>
+      <xloc>688</xloc>
+      <yloc>464</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -274,8 +261,6 @@
       <create_parent_folder>N</create_parent_folder>
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/pipelines/elasticsearch_staging.hpl</filename>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
       <parameters>
         <pass_all_parameters>Y</pass_all_parameters>
@@ -286,8 +271,8 @@
       <set_logfile>N</set_logfile>
       <wait_until_finished>Y</wait_until_finished>
       <parallel>N</parallel>
-      <xloc>576</xloc>
-      <yloc>480</yloc>
+      <xloc>688</xloc>
+      <yloc>608</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -304,10 +289,7 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
@@ -330,16 +312,13 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>880</xloc>
-      <yloc>400</yloc>
+      <xloc>1088</xloc>
+      <yloc>464</yloc>
       <attributes_hac/>
     </action>
     <action>
@@ -356,20 +335,17 @@
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/stop_container.sh</filename>
       <insertScript>N</insertScript>
-      <logext/>
-      <logfile/>
       <loglevel>Basic</loglevel>
-      <script/>
       <set_append_logfile>N</set_append_logfile>
       <set_logfile>N</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
       <xloc>368</xloc>
-      <yloc>480</yloc>
+      <yloc>608</yloc>
       <attributes_hac/>
     </action>
     <action>
-      <name>retrieve_data 2</name>
+      <name>start_postgres_staging</name>
       <description/>
       <type>SHELL</type>
       <attributes/>
@@ -377,7 +353,7 @@
       <add_time>Y</add_time>
       <arg_from_previous>N</arg_from_previous>
       <arguments>
-        <argument>data-setup</argument>
+        <argument>postgres-staging</argument>
       </arguments>
       <exec_per_row>N</exec_per_row>
       <filename>${PROJECT_HOME}/script/start_container.sh</filename>
@@ -389,19 +365,12 @@
       <set_logfile>Y</set_logfile>
       <work_directory>${PROJECT_HOME}/script</work_directory>
       <parallel>N</parallel>
-      <xloc>1104</xloc>
-      <yloc>320</yloc>
+      <xloc>368</xloc>
+      <yloc>224</yloc>
       <attributes_hac/>
     </action>
   </actions>
   <hops>
-    <hop>
-      <from>Start</from>
-      <to>retrieve_data</to>
-      <enabled>Y</enabled>
-      <evaluation>Y</evaluation>
-      <unconditional>Y</unconditional>
-    </hop>
     <hop>
       <from>retrieve_data</from>
       <to>load_on_neo4j</to>
@@ -464,6 +433,41 @@
       <enabled>Y</enabled>
       <evaluation>Y</evaluation>
       <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Start</from>
+      <to>start_postgres_staging</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
+    </hop>
+    <hop>
+      <from>stop_neo4j</from>
+      <to>load_on_cassandra</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>stop_cassandra</from>
+      <to>load_on_mongodb</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>stop_mongodb</from>
+      <to>load_on_elasticsearch</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>N</unconditional>
+    </hop>
+    <hop>
+      <from>Start</from>
+      <to>retrieve_data</to>
+      <enabled>Y</enabled>
+      <evaluation>Y</evaluation>
+      <unconditional>Y</unconditional>
     </hop>
   </hops>
   <notepads>

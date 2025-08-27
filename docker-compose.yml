@@ -53,9 +53,6 @@ services:
       MONGO_INITDB_DATABASE: volcanoes
     volumes:
       - ./mongodb/data:/data/db
-    depends_on:
-      data-setup:
-        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
@@ -108,10 +105,6 @@ services:
       CASSANDRA_SUPERUSER_PASSWORD: password1234
     volumes:
       - ./cassandra/data:/var/lib/cassandra/data
-#      - ./cassandra/conf:/etc/cassandra
-    depends_on:
-      data-setup:
-        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD-SHELL", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' || exit 1" ]
       interval: 20s
@@ -165,9 +158,6 @@ services:
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
     volumes:
       - ./elasticsearch/data:/usr/share/elasticsearch/data
-    depends_on:
-      data-setup:
-        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
       interval: 20s
