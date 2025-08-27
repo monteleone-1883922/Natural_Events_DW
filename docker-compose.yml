@@ -59,8 +59,6 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
-#      neo4j_seed:
-#        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
@@ -68,7 +66,7 @@ services:
       retries: 5
       start_period: 30s
   mongo-express:
-    image: mongo-express:latest-alpine
+    image: mongo-express:1-20-alpine3.19
     container_name: mongo-express
     restart: unless-stopped
     ports:
@@ -102,7 +100,7 @@ services:
         condition: service_healthy
     restart: "no"
   cassandra:
-    image: cassandra:5.0-jammy
+    image: cassandra:4.0-jammy
     container_name: cassandra
     restart: unless-stopped
     ports:
@@ -113,11 +111,10 @@ services:
       CASSANDRA_SUPERUSER_PASSWORD: password1234
     volumes:
       - ./cassandra/data:/var/lib/cassandra/data
+#      - ./cassandra/conf:/etc/cassandra
     depends_on:
       data-setup:
         condition: service_completed_successfully
-#      mongodb_seed:
-#        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD-SHELL", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' || exit 1" ]
       interval: 20s
@@ -130,8 +127,8 @@ services:
     depends_on:
       cassandra:
         condition: service_healthy
-      cassandra_seed:
-        condition: service_completed_successfully
+#      cassandra_seed:
+#        condition: service_completed_successfully
     environment:
       - CASSANDRA_HOST=cassandra
       - CASSANDRA_PORT=9042
@@ -173,8 +170,6 @@ services:
     depends_on:
       data-setup:
         condition: service_completed_successfully
-#      cassandra_seed:
-#        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
       interval: 20s
@@ -225,6 +220,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ./postgres/script:/docker-entrypoint-initdb.d
       - ./postgres/data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U user -d integration_db" ]

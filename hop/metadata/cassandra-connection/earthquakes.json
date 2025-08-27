@@ -2,13 +2,12 @@
   "keyspace": "earthquake",
   "hostname": "localhost",
   "password": "password1234",
-  "virtualPath": "",
-  "schemaPort": "",
-  "localDataCenter": "cluster1",
+  "schemaPort": "9042",
+  "localDataCenter": "datacenter1",
   "port": "9042",
-  "schemaHostname": "",
+  "schemaHostname": "localhost",
   "name": "earthquakes",
-  "socketTimeout": "",
+  "socketTimeout": "10000",
   "username": "cassandra",
   "usingCompression": false
 }

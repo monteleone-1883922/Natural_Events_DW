@@ -94,48 +94,14 @@ class MongoCSVLoader:
             volcanoes_agg_collection.create_index("status")
             self.logger.info("✅ Created indexes on volcanoes_aggregated filter fields")
 
-            # INDICI PER COLLECTION REGIONS
-            regions_collection = self.db['regions']
-            regions_collection.create_index("id")
-            self.logger.info("✅ Created index on regions.id")
-
-
-            # INDICI PER COLLECTION EPOCHS
-            epochs_collection = self.db['epochs']
-            epochs_collection.create_index("type")
-
             self.logger.info("🎯 All database indexes created successfully!")
 
         except Exception as e:
             self.logger.error(f"❌ Error creating indexes: {e}")
             raise
 
-    def load_regions(self, csv_path: str):
 
-        self.logger.info("Loading regions...")
-        df_regions = pl.read_csv(csv_path)
-        collection = self.db['regions']
-        collection.drop()
-        documents = df_regions.to_dicts()
-
-        if documents:
-            result = collection.insert_many(documents)
-            self.logger.info(f"inserted {len(result.inserted_ids)} regions")
-
-
-    def load_epochs(self, csv_path: str):
-
-        self.logger.info("Loading epochs...")
-        df_epoch = pl.read_csv(csv_path)
-        collection = self.db['epochs']
-        collection.drop()
-        documents = df_epoch.to_dicts()
-        if documents:
-            result = collection.insert_many(documents)
-            self.logger.info(f"Inserted {len(result.inserted_ids)} epochs")
-
-
-    def load_volcanoes(self, csv_path: str):
+    def load_volcanoes(self, csv_path: str, regions_df: pl.DataFrame, epoch_df: pl.DataFrame):
 
         self.logger.info("Loading volcanoes...")
         df_volcanoes = pl.read_csv(csv_path).with_columns(
@@ -143,7 +109,20 @@ class MongoCSVLoader:
                     pl.lit("Point").alias("type"),
                     pl.concat_list([pl.col("longitude"), pl.col("latitude")]).alias("coordinates")
                 ]).alias("position")
+            ).join(
+                epoch_df, left_on='timeErupt', right_on='type', how='left'
+            ).drop(
+                ["timeErupt"]
+            ).rename(
+                {"description": "timeErupt"}
+            ).join(
+                regions_df, left_on='region', right_on='id', how='left'
+            ).drop(
+                ["region"]
+            ).rename(
+                {"description": "region"}
             )
+        self.logger.info(f"Schema is {df_volcanoes.schema}")
 
 
         collection = self.db['volcanoes']
@@ -155,9 +134,10 @@ class MongoCSVLoader:
 
 
 
-    def load_eruptions(self, csv_path: str):
+    def load_eruptions(self, csv_path: str, epoch_df: pl.DataFrame):
 
         self.logger.info("Loading eruptions...")
+
         df_eruptions = pl.read_csv(csv_path).with_columns(
                 pl.datetime(pl.col('year'), pl.col('month'), pl.col('day')).alias('date'),
                 # Converti longitudine e latitudine a float
@@ -168,8 +148,14 @@ class MongoCSVLoader:
                     pl.lit("Point").alias("type"),
                     pl.concat_list([pl.col("longitude"), pl.col("latitude")]).alias("coordinates")
                 ]).alias("position")
+            ).join(
+                epoch_df, left_on='timeErupt', right_on='type', how='left'
+            ).drop(
+                ["timeErupt"]
+            ).rename(
+                {"description": "timeErupt"}
             )
-
+        self.logger.info(f"Schema is {df_eruptions.schema}")
         collection = self.db['eruptions']
         collection.drop()
         documents = df_eruptions.to_dicts()
@@ -276,12 +262,11 @@ class MongoCSVLoader:
 
     def load_all_data(self, csv_dir: str):
         try:
-            self.load_regions(os.path.join(csv_dir, "volcano_regions.csv"))
-            self.load_epochs(os.path.join(csv_dir, "eruption_times.csv"))
+            regions = pl.read_csv(os.path.join(csv_dir, "volcano_regions.csv"))
+            eruption_times = pl.read_csv(os.path.join(csv_dir, "eruption_times.csv"))
+            self.load_volcanoes(os.path.join(csv_dir, "volcanoes.csv"), regions, eruption_times)
 
-            self.load_volcanoes(os.path.join(csv_dir, "volcanoes.csv"))
-
-            self.load_eruptions(os.path.join(csv_dir, "eruptions.csv"))
+            self.load_eruptions(os.path.join(csv_dir, "eruptions.csv"), eruption_times)
             self.create_aggregated_volcanoes()
             self.create_indexes()
 
@@ -314,7 +299,7 @@ if __name__ == "__main__":
     DB_NAME = os.getenv("MONGO_DATABASE", "volcanoes")
 
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger("MongoLoader")
 
     loader = MongoCSVLoader(
         mongo_host=MONGO_HOST,

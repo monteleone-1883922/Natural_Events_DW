@@ -221,9 +221,13 @@ def setup_tornadoes():
     tornado_df = df.filter(
         ((pl.col("ns") == 1) & (pl.col("sn") == 1) & (pl.col("sg") == 1)) |
         ((pl.col("ns") != 1) & (pl.col("sn") == 0) & (pl.col("sg") == 1))
-    )
-    traces_df = df.filter((pl.col("ns") != 1) & (pl.col("sn") == 1) & (pl.col("sg") == 2))
-    link_counties_df = df.filter((pl.col("sg") == -9))
+    ).unique().with_row_index(name='unique_id', offset=0)
+    traces_df = df.filter((pl.col("ns") != 1) & (pl.col("sn") == 1) & (pl.col("sg") == 2)) \
+        .rename({"id": "tornado_id"}) \
+        .with_row_index(name='id', offset=0).unique()
+    link_counties_df = df.filter((pl.col("sg") == -9)).with_columns(
+        (5 + (pl.col("id").cum_count().over("id") - 1) * 4).alias("counter")
+    ).unique()
 
     tornado_df.write_csv(get_filename_from_setup('tornado', 'tornado'))
     traces_df.write_csv(get_filename_from_setup('tornado', 'trace'))
