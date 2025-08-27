@@ -1,5 +1,5 @@
 {
-  "server": "localhost",
+  "server": "neo4j",
   "browserPort": "7474",
   "databaseName": "",
   "manualUrls": [],

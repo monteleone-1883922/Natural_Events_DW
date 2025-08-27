@@ -5,7 +5,7 @@
       "databaseName": "integration_db",
       "pluginId": "POSTGRESQL",
       "accessType": 0,
-      "hostname": "localhost",
+      "hostname": "postgres-staging",
       "password": "Encrypted 2be98afc81ac68197bc16bc748fc0fc8e",
       "pluginName": "PostgreSQL",
       "port": "5432",

@@ -1,6 +1,6 @@
 {
   "keyspace": "earthquake",
-  "hostname": "localhost",
+  "hostname": "cassandra",
   "password": "password1234",
   "schemaPort": "9042",
   "localDataCenter": "datacenter1",

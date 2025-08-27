@@ -10,7 +10,7 @@
   "usingAllReplicaSetMembers": false,
   "usingSslSocketFactory": false,
   "replicationTimeoutMs": "",
-  "hostname": "localhost",
+  "hostname": "mongodb",
   "virtualPath": "",
   "port": "27017",
   "name": "volcano",

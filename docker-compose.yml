@@ -224,6 +224,7 @@ services:
       - ./hop:/project
       - ./hop/hop-server.xml:/usr/local/tomcat/webapps/hop/config/hop-server.xml
     environment:
+      PROJECT_HOME: /project
       HOP_PROJECT_DIRECTORY: /project
       HOP_PROJECT_NAME: project
       HOP_SERVER_USER: admin
@@ -233,26 +234,6 @@ services:
       HOP_DATABASE_NAME: integration_db
       HOP_DATABASE_USER: user
       HOP_DATABASE_PASSWORD: password1234
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      elasticsearch:
-#        condition: service_healthy
-#      cassandra:
-#        condition: service_healthy
-#      mongodb:
-#        condition: service_healthy
-#      neo4j:
-#        condition: service_healthy
-#      mongodb_seed:
-#        condition: service_completed_successfully
-#      cassandra_seed:
-#        condition: service_completed_successfully
-#      neo4j_seed:
-#        condition: service_completed_successfully
-#      elasticsearch_seed:
-#        condition: service_completed_successfully
-#    restart: always
   dbt:
     image: xemuliam/dbt:1.10-databricks
     container_name: dbt_transform
