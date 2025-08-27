@@ -26,9 +26,6 @@ services:
     volumes:
       - ./neo4j/data:/var/lib/neo4j/import
       - ./neo4j/data:/var/lib/neo4j/data
-    depends_on:
-      data-setup:
-        condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "cypher-shell", "-u", "neo4j", "-p", "password1234", "RETURN 1" ]
       interval: 15s
