@@ -1,7 +1,7 @@
 
 CREATE TABLE IF NOT EXISTS tsunami (
     id INTEGER PRIMARY KEY,
-    eventDate TIMESTAMP,
+    eventDate VARCHAR(100),
     eventValidity VARCHAR(50),
     causeCode VARCHAR(50),
     earthquakeEventId VARCHAR(50),
