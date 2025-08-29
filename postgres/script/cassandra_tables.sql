@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS earthquakes_by_country (
     regionName VARCHAR(255),
     area VARCHAR(255),
     eqDepth DOUBLE PRECISION,
+    tsunamiEventId INTEGER,
+    volcanoEventId INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -56,17 +58,16 @@ CREATE TABLE IF NOT EXISTS earthquakes_by_magnitude (
     eqMagMfa DOUBLE PRECISION,
     eqMagUnk DOUBLE PRECISION,
     regionName VARCHAR(255),
+    eqDepth DOUBLE PRECISION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indic per earthquakes_by_magnitude
--- CREATE INDEX idx_earthquakes_magnitude_event_date ON earthquakes_by_magnitude(eqMagnitude, event_date DESC);
--- CREATE INDEX idx_earthquakes_magnitude_event_time ON earthquakes_by_magnitude(eqMagnitude, event_time DESC);
-
--- Tabella earthquakes_by_damage
+-- Tabella earthquakes_by_total_damage
 CREATE TABLE IF NOT EXISTS earthquakes_by_damage (
-    damageAmountOrder INTEGER NOT NULL,
-    deaths INTEGER,
+    damageAmountOrderTotal INTEGER NOT NULL,
+    damageAmountOrder INTEGER,
+    country VARCHAR(255),
+    locationName VARCHAR(255),
     year INTEGER,
     month INTEGER,
     day INTEGER,
@@ -77,32 +78,19 @@ CREATE TABLE IF NOT EXISTS earthquakes_by_damage (
     event_date INTEGER,
     event_time VARCHAR(255),
     id INTEGER PRIMARY KEY,
-    country VARCHAR(255),
-    locationName VARCHAR(255),
     latitude DOUBLE PRECISION,
     longitude DOUBLE PRECISION,
     eqMagnitude DOUBLE PRECISION,
     intensity DOUBLE PRECISION,
-    missing INTEGER,
-    missingAmountOrder INTEGER,
-    injuries INTEGER,
-    injuriesAmountOrder INTEGER,
-    housesDestroyed INTEGER,
-    housesDestroyedAmountOrder INTEGER,
-    housesDamaged INTEGER,
-    housesDamagedAmountOrder INTEGER,
+    damageMillionsDollars DOUBLE PRECISION,
+    damageMillionsDollarsTotal DOUBLE PRECISION,
     regionName VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indic per earthquakes_by_damage
--- CREATE INDEX idx_earthquakes_damage_deaths ON earthquakes_by_damage(damageAmountOrder, deaths DESC);
--- CREATE INDEX idx_earthquakes_damage_id ON earthquakes_by_damage(damageAmountOrder, id);
-
--- Tabella earthquakes_by_total_damage
-CREATE TABLE IF NOT EXISTS earthquakes_by_total_damage (
-    damageAmountOrderTotal INTEGER NOT NULL,
-    deathsTotal INTEGER,
+-- Tabella earthquakes_by_deaths
+CREATE TABLE IF NOT EXISTS earthquakes_by_deaths (
+    deathsTotal INTEGER NOT NULL,
     country VARCHAR(255),
     locationName VARCHAR(255),
     year INTEGER,
@@ -119,18 +107,83 @@ CREATE TABLE IF NOT EXISTS earthquakes_by_total_damage (
     longitude DOUBLE PRECISION,
     eqMagnitude DOUBLE PRECISION,
     intensity DOUBLE PRECISION,
-    tsunamiEventId INTEGER,
-    volcanoEventId INTEGER,
     deaths INTEGER,
     deathsAmountOrder INTEGER,
     deathsAmountOrderTotal INTEGER,
+    regionName VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabella earthquakes_by_missing
+CREATE TABLE IF NOT EXISTS earthquakes_by_missing (
+    country VARCHAR(255),
+    locationName VARCHAR(255),
+    year INTEGER,
+    month INTEGER,
+    day INTEGER,
+    hour INTEGER,
+    minute INTEGER,
+    second DOUBLE PRECISION,
+    event_date_txt VARCHAR(255),
+    event_date INTEGER,
+    event_time VARCHAR(255),
+    id INTEGER PRIMARY KEY,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    eqMagnitude DOUBLE PRECISION,
+    intensity DOUBLE PRECISION,
     missing INTEGER,
     missingAmountOrder INTEGER,
     missingTotal INTEGER,
-    missingAmountOrderTotal INTEGER,
+    missingAmountOrderTotal INTEGER NOT NULL,
+    regionName VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabella earthquakes_by_injuries
+CREATE TABLE IF NOT EXISTS earthquakes_by_injuries (
+    country VARCHAR(255),
+    locationName VARCHAR(255),
+    year INTEGER,
+    month INTEGER,
+    day INTEGER,
+    hour INTEGER,
+    minute INTEGER,
+    second DOUBLE PRECISION,
+    event_date_txt VARCHAR(255),
+    event_date INTEGER,
+    event_time VARCHAR(255),
+    id INTEGER PRIMARY KEY,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    eqMagnitude DOUBLE PRECISION,
+    intensity DOUBLE PRECISION,
     injuries INTEGER,
     injuriesAmountOrder INTEGER,
     injuriesTotal INTEGER,
+    injuriesAmountOrderTotal INTEGER NOT NULL,
+    regionName VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabella earthquakes_by_houses_damages
+CREATE TABLE IF NOT EXISTS earthquakes_by_houses_damages (
+    country VARCHAR(255),
+    locationName VARCHAR(255),
+    year INTEGER,
+    month INTEGER,
+    day INTEGER,
+    hour INTEGER,
+    minute INTEGER,
+    second DOUBLE PRECISION,
+    event_date_txt VARCHAR(255),
+    event_date INTEGER,
+    event_time VARCHAR(255),
+    id INTEGER PRIMARY KEY,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    eqMagnitude DOUBLE PRECISION,
+    intensity DOUBLE PRECISION,
     housesDestroyed INTEGER,
     housesDestroyedAmountOrder INTEGER,
     housesDestroyedTotal INTEGER,
@@ -138,20 +191,8 @@ CREATE TABLE IF NOT EXISTS earthquakes_by_total_damage (
     housesDamaged INTEGER,
     housesDamagedAmountOrder INTEGER,
     housesDamagedTotal INTEGER,
-    housesDamagedAmountOrderTotal INTEGER,
-    damageMillionsDollars DOUBLE PRECISION,
-    damageMillionsDollarsTotal DOUBLE PRECISION,
+    housesDamagedAmountOrderTotal INTEGER NOT NULL,
     regionName VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indic per earthquakes_by_total_damage
--- CREATE INDEX idx_earthquakes_total_damage_deaths ON earthquakes_by_total_damage(damageAmountOrderTotal, deathsTotal DESC);
--- CREATE INDEX idx_earthquakes_total_damage_id ON earthquakes_by_total_damage(damageAmountOrderTotal, id);
-
-
--- Comments on tables for documentation
-COMMENT ON TABLE earthquakes_by_country IS 'Table for earthquakes organized by country, sorted by date and time';
-COMMENT ON TABLE earthquakes_by_magnitude IS 'Table for earthquakes organized by magnitude, sorted by date and time';
-COMMENT ON TABLE earthquakes_by_damage IS 'Table for earthquakes organized by damage level, sorted by casualties';
-COMMENT ON TABLE earthquakes_by_total_damage IS 'Table for earthquakes organized by total damage, sorted by total casualties';
