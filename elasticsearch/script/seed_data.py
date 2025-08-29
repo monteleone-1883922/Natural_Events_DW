@@ -13,7 +13,7 @@ MAPPING = {
             "eventValidity": {"type": "keyword"},
             "causeCode": {"type": "keyword"},
             "earthquakeEventId": {"type": "keyword"},
-            "volcanoEventId": {"type": "keyword"},
+            "numDeposits": {"type": "integer"},
             "country": {"type": "keyword"},
             "locationName": {
                 "type": "text",
@@ -21,34 +21,46 @@ MAPPING = {
             },
             "regionCode": {"type": "keyword"},
             "geoLocation": {"type": "geo_point"},
-            "eqMagnitude": {"type": "float"},
-            "eqDepth": {"type": "float"},
-            "maxWaterHeight": {"type": "float"},
-            "tsIntensity": {"type": "float"},
-            "tsMtIi": {"type": "float"},
-            "tsMtAbe": {"type": "float"},
-            "deaths": {"type": "integer"},
-            "deathsTotal": {"type": "integer"},
-            "injuries": {"type": "integer"},
-            "injuriesTotal": {"type": "integer"},
-            "missing": {"type": "integer"},
-            "missingTotal": {"type": "integer"},
-            "housesDestroyed": {"type": "integer"},
-            "housesDestroyedTotal": {"type": "integer"},
-            "housesDamaged": {"type": "integer"},
-            "housesDamagedTotal": {"type": "integer"},
-            "damageMillionsDollars": {"type": "float"},
-            "damageMillionsDollarsTotal": {"type": "float"},
             "numRunups": {"type": "integer"},
-            "numDeposits": {"type": "integer"},
-            "area": {"type": "keyword"},
+            "tsIntensity": {"type": "float"},
+            "deathsAmountOrder": {"type": "integer"},
+            "damageAmountOrder": {"type": "integer"},
+            "deathsAmountOrderTotal": {"type": "integer"},
+            "damageAmountOrderTotal": {"type": "integer"},
             "publish": {"type": "boolean"},
             "oceanicTsunami": {"type": "boolean"},
+            "volcanoEventId": {"type": "keyword"},
+            "maxWaterHeight": {"type": "float"},
+            "eqMagnitude": {"type": "float"},
+            "housesDestroyedAmountOrder": {"type": "integer"},
+            "deathsTotal": {"type": "integer"},
+            "housesDestroyedAmountOrderTotal": {"type": "integer"},
+            "tsMtIi": {"type": "float"},
+            "deaths": {"type": "integer"},
+            "eqDepth": {"type": "float"},
+            "housesDamagedAmountOrder": {"type": "integer"},
+            "housesDamagedAmountOrderTotal": {"type": "integer"},
+            "housesDestroyed": {"type": "integer"},
+            "housesDestroyedTotal": {"type": "integer"},
+            "area": {"type": "keyword"},
+            "injuries": {"type": "integer"},
+            "injuriesAmountOrder": {"type": "integer"},
+            "injuriesTotal": {"type": "integer"},
+            "injuriesAmountOrderTotal": {"type": "integer"},
+            "housesDamaged": {"type": "integer"},
+            "housesDamagedTotal": {"type": "integer"},
+            "missingTotal": {"type": "integer"},
+            "missingAmountOrderTotal": {"type": "integer"},
+            "damageMillionsDollarsTotal": {"type": "float"},
+            "tsMtAbe": {"type": "float"},
+            "damageMillionsDollars": {"type": "float"},
             "warningStatusId": {"type": "keyword"},
+            "missing": {"type": "integer"},
+            "missingAmountOrder": {"type": "integer"},
             "regionName": {"type": "text"},
             "cause": {"type": "text"},
             "validity": {"type": "text"},
-            "warningStatus": {"type": "text"},
+            "warningStatus": {"type": "text"}
         }
     }
 }
@@ -86,47 +98,59 @@ def row_to_doc(row):
 
     return {
         "id": row["id"],
-        "eventDate": event_date,
         "eventValidity": row.get("eventValidity"),
         "causeCode": row.get("causeCode"),
         "earthquakeEventId": row.get("earthquakeEventId"),
-        "volcanoEventId": row.get("volcanoEventId"),
+        "numDeposits": row.get("numDeposits"),  # AGGIUNTO
         "country": row.get("country"),
         "locationName": row.get("locationName"),
         "regionCode": row.get("regionCode"),
-        "geoLocation": {
-            "lat": row["latitude"],
-            "lon": row["longitude"]
-        } if row["latitude"] is not None and row["longitude"] is not None else None,
-        "eqMagnitude": row.get("eqMagnitude"),
-        "eqDepth": row.get("eqDepth"),
-        "maxWaterHeight": row.get("maxWaterHeight"),
+        "numRunups": row.get("numRunups"),
         "tsIntensity": row.get("tsIntensity"),
-        "tsMtIi": row.get("tsMtIi"),
-        "tsMtAbe": row.get("tsMtAbe"),
-        "deaths": row.get("deaths"),
+        "deathsAmountOrder": row.get("deathsAmountOrder"),  # AGGIUNTO
+        "damageAmountOrder": row.get("damageAmountOrder"),  # AGGIUNTO
+        "deathsAmountOrderTotal": row.get("deathsAmountOrderTotal"),  # AGGIUNTO
+        "damageAmountOrderTotal": row.get("damageAmountOrderTotal"),  # AGGIUNTO
+        "publish": row.get("publish", False),
+        "oceanicTsunami": row.get("oceanicTsunami", False),
+        "volcanoEventId": row.get("volcanoEventId"),
+        "maxWaterHeight": row.get("maxWaterHeight"),
+        "eqMagnitude": row.get("eqMagnitude"),
+        "housesDestroyedAmountOrder": row.get("housesDestroyedAmountOrder"),  # AGGIUNTO
         "deathsTotal": row.get("deathsTotal"),
-        "injuries": row.get("injuries"),
-        "injuriesTotal": row.get("injuriesTotal"),
-        "damageMillionsDollars": row.get("damageMillionsDollars"),
-        "damageMillionsDollarsTotal": row.get("damageMillionsDollarsTotal"),
-        "missing": row.get("missing"),
-        "missingTotal": row.get("missingTotal"),
+        "housesDestroyedAmountOrderTotal": row.get("housesDestroyedAmountOrderTotal"),  # AGGIUNTO
+        "tsMtIi": row.get("tsMtIi"),
+        "deaths": row.get("deaths"),
+        "eqDepth": row.get("eqDepth"),
+        "housesDamagedAmountOrder": row.get("housesDamagedAmountOrder"),  # AGGIUNTO
+        "housesDamagedAmountOrderTotal": row.get("housesDamagedAmountOrderTotal"),  # AGGIUNTO
         "housesDestroyed": row.get("housesDestroyed"),
         "housesDestroyedTotal": row.get("housesDestroyedTotal"),
+        "area": row.get("area"),
+        "injuries": row.get("injuries"),
+        "injuriesAmountOrder": row.get("injuriesAmountOrder"),  # AGGIUNTO
+        "injuriesTotal": row.get("injuriesTotal"),
+        "injuriesAmountOrderTotal": row.get("injuriesAmountOrderTotal"),  # AGGIUNTO
         "housesDamaged": row.get("housesDamaged"),
         "housesDamagedTotal": row.get("housesDamagedTotal"),
-        "numRunups": row.get("numRunups"),
-        "numDeposits": row.get("numDeposits"),
-        "area": row.get("area"),
+        "missingTotal": row.get("missingTotal"),
+        "missingAmountOrderTotal": row.get("missingAmountOrderTotal"),  # AGGIUNTO
+        "damageMillionsDollarsTotal": row.get("damageMillionsDollarsTotal"),
+        "tsMtAbe": row.get("tsMtAbe"),
+        "damageMillionsDollars": row.get("damageMillionsDollars"),
         "warningStatusId": row.get("warningStatusId"),
+        "missing": row.get("missing"),
+        "missingAmountOrder": row.get("missingAmountOrder"),  # AGGIUNTO
         "regionName": row.get("regionName"),
         "cause": row.get("cause"),
         "validity": row.get("validity"),
         "warningStatus": row.get("warningStatus"),
-        "publish": row.get("publish", False),
-        "oceanicTsunami": row.get("oceanicTsunami", False)
-    }
+        "eventDate": event_date,
+        "geoLocation": {
+            "lat": row["latitude"],
+            "lon": row["longitude"]
+        } if row["latitude"] is not None and row["longitude"] is not None else None
+}
 
 
 class ElasticSearchLoader:
