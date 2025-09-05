@@ -50,5 +50,11 @@ CREATE TABLE IF NOT EXISTS tsunami (
     cause VARCHAR(255),
     validity VARCHAR(255),
     warningStatus VARCHAR(255),
+    year INTEGER,
+    month INTEGER,
+    day INTEGER,
+    hour INTEGER,
+    minute INTEGER,
+    second FLOAT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

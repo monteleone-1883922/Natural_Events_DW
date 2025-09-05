@@ -60,7 +60,13 @@ MAPPING = {
             "regionName": {"type": "text"},
             "cause": {"type": "text"},
             "validity": {"type": "text"},
-            "warningStatus": {"type": "text"}
+            "warningStatus": {"type": "text"},
+            "year": {"type": "integer"},
+            "month": {"type": "integer"},
+            "day": {"type": "integer"},
+            "hour": {"type": "integer"},
+            "minute": {"type": "integer"},
+            "second": {"type": "float"}
         }
     }
 }
@@ -146,6 +152,12 @@ def row_to_doc(row):
         "validity": row.get("validity"),
         "warningStatus": row.get("warningStatus"),
         "eventDate": event_date,
+        "year": row.get("year"),
+        "month": row.get("month"),
+        "day": row.get("day"),
+        "hour": row.get("hour"),
+        "minute": row.get("minute"),
+        "second": row.get("second"),
         "geoLocation": {
             "lat": row["latitude"],
             "lon": row["longitude"]

@@ -233,58 +233,16 @@ services:
       HOP_DATABASE_NAME: integration_db
       HOP_DATABASE_USER: user
       HOP_DATABASE_PASSWORD: password1234
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      elasticsearch:
-#        condition: service_healthy
-#      cassandra:
-#        condition: service_healthy
-#      mongodb:
-#        condition: service_healthy
-#      neo4j:
-#        condition: service_healthy
-#      mongodb_seed:
-#        condition: service_completed_successfully
-#      cassandra_seed:
-#        condition: service_completed_successfully
-#      neo4j_seed:
-#        condition: service_completed_successfully
-#      elasticsearch_seed:
-#        condition: service_completed_successfully
-#    restart: always
-  dbt:
-    image: xemuliam/dbt:1.10-databricks
-    container_name: dbt_transform
-    volumes:
-      - ./dbt:/usr/app
-    working_dir: /usr/app
-    entrypoint: [ "dbt" ]
-#    depends_on:
-#      - postgres
-  ontop:
-    image: ontop/ontop:5.3.0
-    container_name: ontop_server
-    ports:
-      - "8085:8080"
-    volumes:
-      - ./ontop:/opt/ontop/config
-    command: >
-      /opt/ontop/ontop endpoint
-      --mapping=/opt/ontop/config/mapping.obda
-      --ontology=/opt/ontop/config/ontology.owl
-      --properties=/opt/ontop/config/ontop.properties
-#    depends_on:
-#      - postgres
-#    depends_on:
-#      elasticsearch_seed:
-#        condition: service_completed_successfully
-#      cassandra_seed:
-#        condition: service_completed_successfully
-#      mongodb_seed:
-#        condition: service_completed_successfully
-#      neo4j_seed:
-#        condition: service_completed_successfully
+  metabase:
+      image: metabase/metabase:v0.56.3
+      container_name: metabase
+      ports:
+        - "3000:3000"
+      environment:
+        - MB_DB_FILE=/metabase.db/metabase.db
+      volumes:
+        - ./metabase/data:/metabase.db
+
 
 
 
