@@ -1,0 +1,21 @@
+{
+  "authenticationDatabaseName": "admin",
+  "usingKerberos": false,
+  "journaled": true,
+  "dbName": "volcanoes",
+  "authenticationUser": "mongo",
+  "connectTimeoutMs": "100",
+  "writeConcern": "",
+  "authenticationPassword": "Encrypted 2be98afc81ac68197bc16bc748fc0fc8e",
+  "usingAllReplicaSetMembers": false,
+  "usingSslSocketFactory": false,
+  "replicationTimeoutMs": "",
+  "hostname": "localhost",
+  "virtualPath": "",
+  "port": "27017",
+  "name": "volcano",
+  "readPreference": "PRIMARY",
+  "socketTimeoutMs": "100",
+  "readPrefTagSets": "",
+  "authenticationMechanism": "MONGODB_CR"
+}

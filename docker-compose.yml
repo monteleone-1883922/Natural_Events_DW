@@ -1,0 +1,250 @@
+services:
+  data-setup:
+    container_name: data-setup
+    build:
+      context: setup-data
+      dockerfile: Dockerfile
+    volumes:
+      - ./neo4j/data:/neo4j/data
+      - ./mongodb/data:/mongodb/data
+      - ./cassandra/data:/cassandra/data
+      - ./elasticsearch/data:/elasticsearch/data
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"   # Browser
+      - "7687:7687"   # Bolt (protocollo per Cypher)
+    environment:
+      NEO4J_AUTH: neo4j/password1234
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_apoc_import_file_enabled: "true"
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_dbms_connector_bolt_advertised__address: localhost:7687
+    volumes:
+      - ./neo4j/data:/var/lib/neo4j/import
+      - ./neo4j/data:/var/lib/neo4j/data
+    healthcheck:
+      test: [ "CMD", "cypher-shell", "-u", "neo4j", "-p", "password1234", "RETURN 1" ]
+      interval: 15s
+      timeout: 20s
+      retries: 15
+  neo4j_seed:
+    image: neo4j:5.26-community
+    container_name: neo4j-seed
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    volumes:
+      - ./neo4j/scripts:/init
+      - ./neo4j/data:/var/lib/neo4j/import
+    entrypoint: [ "bash", "/init/init.sh" ]
+  mongodb:
+    image: mongo:8.0-rc-jammy
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: password1234
+      MONGO_INITDB_DATABASE: volcanoes
+    volumes:
+      - ./mongodb/data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  mongo-express:
+    image: mongo-express:1-20-alpine3.19
+    container_name: mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongo
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password1234
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:password1234@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin  # Username per accedere all'interfaccia web
+      ME_CONFIG_BASICAUTH_PASSWORD: admin  # Password per accedere all'interfaccia web
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      mongodb_seed:
+        condition: service_completed_successfully
+  mongodb_seed:
+    container_name: mongodb-seed
+    build:
+      context: ./mongodb/script
+      dockerfile: Dockerfile
+    environment:
+      MONGO_URL: mongodb://mongo:password1234@mongodb:27017/volcano?authSource=admin
+      MONGO_DATABASE: volcanoes
+      MONGO_USERNAME: mongo
+      MONGO_PASSWORD: password1234
+    volumes:
+      - ./mongodb/data:/app/data
+      - ./mongodb/script/seed_data.py:/app/seed_data.py
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: "no"
+  cassandra:
+    image: cassandra:4.0-jammy
+    container_name: cassandra
+    restart: unless-stopped
+    ports:
+      - "9042:9042"
+    environment:
+      CASSANDRA_USER: cassandra
+      CASSANDRA_PASSWORD: password1234
+      CASSANDRA_SUPERUSER_PASSWORD: password1234
+    volumes:
+      - ./cassandra/data:/var/lib/cassandra/data
+    healthcheck:
+      test: [ "CMD-SHELL", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES' || exit 1" ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+  cassandra_web:
+    image: ipushc/cassandra-web
+    container_name: cassandra_web
+    depends_on:
+      cassandra:
+        condition: service_healthy
+#      cassandra_seed:
+#        condition: service_completed_successfully
+    environment:
+      - CASSANDRA_HOST=cassandra
+      - CASSANDRA_PORT=9042
+      - CASSANDRA_USER=cassandra
+      - CASSANDRA_PASSWORD=password1234
+    ports:
+      - "8083:8083"
+  cassandra_seed:
+    container_name: cassandra-seed
+    build:
+      context: ./cassandra/script
+      dockerfile: Dockerfile
+    environment:
+      CASSANDRA_HOST: cassandra
+      CASSANDRA_PORT: 9042
+      CASSANDRA_KEYSPACE: earthquakes
+      CASSANDRA_USERNAME: cassandra
+      CASSANDRA_PASSWORD: password1234
+      INPUT_FILE: /app/data/earthquake.csv
+    volumes:
+      - ./cassandra/data:/app/data
+      - ./cassandra/script/seed_data.py:/app/seed_data.py
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    restart: "no"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.2
+    container_name: elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.1.2
+    container_name: kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      elasticsearch_seed:
+        condition: service_completed_successfully
+  elasticsearch_seed:
+    container_name: elasticsearch-seed
+    build:
+      context: ./elasticsearch/script
+      dockerfile: Dockerfile
+    environment:
+      KIBANA_HOST: kibana
+      KIBANA_PORT: 5601
+      ELASTICSEARCH_HOST: elasticsearch
+      ELASTICSEARCH_PORT: 9200
+      INDEX_NAME: tsunami_events
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      DATA_SOURCE_PATH: /app/data/tsunami.csv
+    volumes:
+      - ./elasticsearch/data:/app/data
+      - ./elasticsearch/script/seed_data.py:/app/seed_data.py
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: "no"
+
+  postgres-staging:
+    image: postgres:17-alpine
+    container_name: target_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password1234
+      POSTGRES_DB: integration_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/script:/docker-entrypoint-initdb.d
+      - ./postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d integration_db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  hop:
+    image: apache/hop:2.15.0
+    container_name: apache_hop
+    ports:
+      - "8086:8080"
+    volumes:
+      - ./hop:/project
+      - ./hop/hop-server.xml:/usr/local/tomcat/webapps/hop/config/hop-server.xml
+    environment:
+      HOP_PROJECT_DIRECTORY: /project
+      HOP_PROJECT_NAME: project
+      HOP_SERVER_USER: admin
+      HOP_SERVER_PASS: password1234
+      HOP_DATABASE_HOST: target_postgres
+      HOP_DATABASE_PORT: 5432
+      HOP_DATABASE_NAME: integration_db
+      HOP_DATABASE_USER: user
+      HOP_DATABASE_PASSWORD: password1234
+  metabase:
+      image: metabase/metabase:v0.56.3
+      container_name: metabase
+      ports:
+        - "3000:3000"
+      environment:
+        - MB_DB_FILE=/metabase.db/metabase.db
+      volumes:
+        - ./metabase/data:/metabase.db
+
+
+
+
+
+

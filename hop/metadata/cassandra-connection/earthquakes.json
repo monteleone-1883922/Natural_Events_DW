@@ -1,0 +1,13 @@
+{
+  "keyspace": "earthquake",
+  "hostname": "localhost",
+  "password": "password1234",
+  "schemaPort": "9042",
+  "localDataCenter": "datacenter1",
+  "port": "9042",
+  "schemaHostname": "localhost",
+  "name": "earthquakes",
+  "socketTimeout": "10000",
+  "username": "cassandra",
+  "usingCompression": false
+}
