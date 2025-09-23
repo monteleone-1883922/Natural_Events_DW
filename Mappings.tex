@@ -1,0 +1,541 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+
+\title{test mappings}
+\author{alessandro monteleone}
+\date{September 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Mappings}
+
+
+\subsection{glbl\_earthquake}
+
+\begin{multline}
+(\forall id, intensity, depth.(
+\exists x_1, ..., x_{21}. earthquakes\_by\_country(id, intensity, depth, x_1, ..., x_{21})))  \wedge \\ 
+(\forall id, mag, mag\_ms, mag\_ml, mag\_mw, mag\_mb, mag\_mfa, mag\_unk.(\\
+\exists x_1, ..., x_{19}. earthquakes\_by\_magnitude(id, ..., mag\_unk, x_1, ..., x_{19}))) \longrightarrow earthquake(id , \\ natural\_event\_id = 'earthquake\_' + id,  intensity, depth, mag, mag\_ms, \\ mag\_ml, mag\_mw, mag\_mb, mag\_mfa, mag\_unk)
+\end{multline} 
+
+\subsection{glbl\_eruption}
+
+
+\begin{multline}
+\forall eruption, eruption\_location, significant, vei, agent, eruption\_status, volcano\_id, id.( \\
+\exists x_1, ..., x_{36}. eruptions(eruption, ..., id, x_1, ..., x_{36})) \longrightarrow eruption(eruption, eruption\_location, significant, vei, \\ 
+agent, eruption\_status, volcano\_id, id , natural\_event\_id = 'eruption\_' + id)
+\end{multline}
+
+\subsection{glbl\_tsunami}
+
+\begin{multline}
+\forall id, event\_validity, cause\_code, num\_deposits, num\_runups, ts\_intensity, \\ oceanic\_tsunami, max\_water\_height, mag, ts\_mtii, depth, ts\_mtabe, warning\_status\_id, \\ cause, validity, warning\_status, natural\_event\_id, year, month, day, hour, min, sec.( \\
+\exists x_1, ..., x_{36}. tsunami(id, ..., sec, x_1, ..., x_{36})) \longrightarrow tsunami(id , natural\_event\_id = 'tsunami\_' + id, \\ event\_validity, cause\_code, num\_deposits, num\_runups, ts\_intensity, \\ oceanic\_tsunami, max\_water\_height, mag, ts\_mtii, depth, ts\_mtabe, warning\_status\_id, \\ cause, validity, warning\_status, natural\_event\_id, year,  month, day, hour, min, sec)
+\end{multline} 
+
+
+\subsection{glbl\_volcano}
+
+\begin{multline}
+\forall country, elevation, id, lat, volcano\_location, lon, morphology, volcano\_name, \\ region, volcano\_status, time\_erupt, new\_num, num.( \\
+\exists x_1, ..., x_{6}. volcanoes(country, ..., num, x_1, ..., x_{6})) \longrightarrow volcano(country, elevation, id, lat, volcano\_location, \\ lon, morphology, volcano\_name, region, volcano\_status, time\_erupt, new\_num, num)
+\end{multline} 
+
+\subsection{glbl\_tornado\_trace}
+
+
+\begin{multline}
+\forall id, f\_scale, lat\_end, lon\_end, trace\_length, width, alt\_mag, order\_idx, crop\_damage\_millions.( \\
+\exists x_1, ..., x_{16}. traces(id, ..., crop\_damage\_millions, x_1, ..., x_{16})) \longrightarrow volcano(id , \\ natural\_event\_id = 'tornado\_' + id, f\_scale, lat\_end, lon\_end, \\ trace\_length, width, alt\_mag, order\_idx, crop\_damage\_millions)
+\end{multline} 
+
+
+\subsection{glbl\_related\_event}
+
+\begin{multline}
+\forall earthquake\_id, eruption\_id.(
+\exists x_1, ..., x_{22}.  earthquakes\_by\_country('earthquake\_' + earthquake\_id, \\ 'eruption\_' +  eruption\_id, x_1, ..., x_{22})) \longrightarrow related\_event(earthquake\_id, eruption\_id)
+\end{multline} 
+
+
+\begin{multline}
+\forall earthquake\_id, tsunami\_id.(
+\exists x_1, ..., x_{22}. earthquakes\_by\_country('earthquake\_' + earthquake\_id,\\ 'tsunami\_' +  tsunami\_id, x_1, ..., x_{22})) \longrightarrow related\_event(earthquake\_id, tsunami\_id)
+\end{multline}
+
+\begin{multline}
+\forall earthquake\_id, eruption\_id.(
+\exists x_1, ..., x_{40}. eruptions('earthquake\_' + earthquake\_id, \\ 'eruption\_' +  eruption\_id, x_1, ..., x_{40})) \longrightarrow related\_event(earthquake\_id, eruption\_id)
+\end{multline} 
+
+\begin{multline}
+\forall tsunami\_id, eruption\_id.(
+\exists x_1, ..., x_{40}. eruptions('tsunami\_' + tsunami\_id, \\ 'eruption\_' +  eruption\_id, x_1, ..., x_{40})) \longrightarrow related\_event(tsunami\_id, eruption\_id)
+\end{multline} 
+
+\begin{multline}
+\forall tsunami\_id, earthquake\_id.(
+\exists x_1, ..., x_{56}. tsunami('tsunami\_' + tsunami\_id, \\ 'earthquake\_' +  earthquake\_id, x_1, ..., x_{56})) \longrightarrow related\_event(tsunami\_id, earthquake\_id)
+\end{multline} 
+
+\begin{multline}
+\forall tsunami\_id, eruption\_id.(
+\exists x_1, ..., x_{56}. tsunami('tsunami\_' + tsunami\_id,\\ 'eruption\_' +  eruption\_id, x_1, ..., x_{56})) \longrightarrow related\_event(tsunami\_id, eruption\_id)
+\end{multline} 
+
+
+
+\subsection{glbl\_natural\_event}
+
+\begin{multline}
+(\forall country, id, locationname, lat, lon, regionname, area, year, month, day, hour, min, sec.( \\
+\exists x_1,..., x_{11}. 
+earthquakes\_by\_country(country, ..., sec, 
+x_1,... x_{11}))) \wedge \\ (\forall dmg\_amt\_tot, dmg\_amt\_order, id, dmg\_mill, dmg\_mill\_tot.( \\
+\exists x_1, ..., x_{17}. earthquakes\_by\_damage(dmg\_amt\_tot, ..., dmg\_mill\_tot, x_1, ..., x_{17}))) \wedge \\ 
+(\forall deaths\_tot, id, deaths, deaths\_ord, deaths\_ord\_tot.( \\
+\exists x_1, ..., x_{17}. earthquakes\_by\_deaths(deaths\_tot, ..., deaths\_ord\_tot, x_1, ..., x_{17}))) \wedge \\ 
+(\forall id, injuries, inj\_ord, inj\_tot, inj\_ord\_tot.(\\
+\exists x_1, ..., x_{17}. earthquakes\_by\_injuries(id, ..., inj\_ord\_tot, x_1, ..., x_{17})))
+ \wedge \\ (\forall id, missing, miss\_ord, miss\_tot, miss\_ord\_tot.( \\
+\exists x_1, ..., x_{17}. earthquakes\_by\_missing(id, ..., inj\_ord\_tot, x_1, ..., x_{17})))
+ \wedge \\ (\forall id, houses\_destr, houses\_destr\_ord, houses\_destr\_tot, \\ houses\_destr\_ord\_tot, houses\_dmg, houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot.(
+\exists x_1, ..., x_{13}. \\ earthquakes\_by\_houses\_damages(id, ..., houses\_dmg\_ord\_tot, x_1, ..., x_{17}))) \longrightarrow natural\_event(country, id, \\ locationname, lat, lon,  regionname, area, year, month, day, hour, min, sec, \\ dmg\_amt\_tot, dmg\_amt\_order, dmg\_mill, dmg\_mill\_tot, deaths\_tot, \\ deaths, deaths\_ord, deaths\_ord\_tot, injuries, inj\_ord, inj\_tot, \\ inj\_ord\_tot, missing, miss\_ord, miss\_tot, miss\_ord\_tot, houses\_destr, \\ houses\_destr\_ord, houses\_destr\_tot, houses\_destr\_ord\_tot, houses\_dmg, \\ houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot, event\_type =  'earthquake')
+\end{multline} 
+
+\begin{multline}
+\forall id,  event\_ts,  country,  location,  lat,  lon,  deaths\_ord,  dmg\_ord,  \\ deaths\_ord\_tot,  dmg\_ord\_tot,  houses\_destr\_ord,  deaths\_tot,  houses\_destr\_ord\_tot, \\ deaths,  houses\_dmgd\_ord,  houses\_dmgd\_ord\_tot,  houses\_destr,  houses\_destr\_tot,  area, \\ inj,  inj\_ord,  inj\_tot,  inj\_ord\_tot,  houses\_dmgd,  houses\_dmgd\_tot,  miss\_tot, \\ miss\_ord\_tot,  dmg\_mill\_tot,  dmg\_mill,  miss,  miss\_ord,  region,  event\_type,  year,  month,  day,  hour,  min,  sec.( \\
+\exists x_1, ..., x_{23}. tsunami(id, ..., sec, x_1, ..., x_{23})) \longrightarrow natural\_event(country, id, \\ locationname, lat, lon,  regionname, area, year, month, day, hour, min, sec, \\ dmg\_amt\_tot, dmg\_amt\_order, dmg\_mill, dmg\_mill\_tot, deaths\_tot, \\ deaths, deaths\_ord, deaths\_ord\_tot, injuries, inj\_ord, inj\_tot, \\ inj\_ord\_tot, missing, miss\_ord, miss\_tot, miss\_ord\_tot, houses\_destr, \\ houses\_destr\_ord, houses\_destr\_tot, houses\_destr\_ord\_tot, houses\_dmg, \\ houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot, event\_type =  'tsunami')
+\end{multline} 
+
+\begin{multline}
+(\forall dmg\_ord,  houses\_destr,  inj,  location,  lon,  miss,  dmg\_ord\_tot,  \\ houses\_destr\_ord,  inj\_ord,  miss\_ord,  country,  dmg\_mill,  houses\_destr\_ord\_tot, \\  inj\_ord\_tot,  miss\_ord\_tot,  dmg\_mill\_tot,  houses\_destr\_tot,  inj\_tot,  miss\_tot,  \\  event\_ts,  id, lat,  deaths,  deaths\_ord,  deaths\_ord\_tot,  deaths\_tot,  \\ houses\_dmgd\_ord\_tot,  houses\_dmgd\_ord,  houses\_dmgd,  houses\_dmgd\_tot,  volcano\_id, \\  year,  month,  day,  hour,  min,  sec.(
+\exists x_1, ..., x_{8}. eruptions(dmg\_ord, ..., sec, x_1, ..., x_{8}))) \wedge \\ 
+(\forall id, volcano\_id, region.(
+\exists x_1,..., x_{13}. \\
+volcanoes(id, volcano\_id, region, 
+x_1,... x_{13}))) \longrightarrow natural\_event(country, id, \\ locationname, lat, lon,  regionname, area, year, month, day, hour, min, sec, \\ dmg\_amt\_tot, dmg\_amt\_order, dmg\_mill, dmg\_mill\_tot, deaths\_tot, \\ deaths, deaths\_ord, deaths\_ord\_tot, injuries, inj\_ord, inj\_tot, \\ inj\_ord\_tot, missing, miss\_ord, miss\_tot, miss\_ord\_tot, houses\_destr, \\ houses\_destr\_ord, houses\_destr\_tot, houses\_destr\_ord\_tot, houses\_dmg, \\ houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot, event\_type =  'eruption')
+\end{multline} 
+
+\begin{multline}
+(\forall trace\_id, injuries, deaths, dmg\_mill, lat, lon, state\_fips, dmg\_mill\_tot, dmg\_ord,\\  dmg\_ord\_tot, inj\_tot, inj\_ord, inj\_ord\_tot, missing, miss\_tot, \\ miss\_ord\_tot, miss\_ord, houses\_destr, houses\_destr\_tot, houses\_destr\_ord, \\ houses\_destr\_ord\_tot, deaths\_tot, deaths\_ord, deaths\_ord\_tot, country, regionname, \\ houses\_dmg, houses\_dmg\_tot, houses\_dmg\_ord\_tot, houses\_dmg\_ord, year, month, day, hour, min, sec.( \\
+\exists x_1, ..., x_{18}. traces(trace\_id, ..., sec, x_1, ..., x_{18})))  \wedge \\ 
+(\forall trace\_id, county\_fips.(
+\exists x_1, ..., x_{2}. trace\_affected\_counties(trace\_id, county\_fips, order\_idx=1, x_{2})))
+ \wedge \\ (
+ \forall name, county\_fips.(
+\exists x_1, ..., x_{3}. county(name, county\_fips, x_1, ..., x_{3}))
+ ) \wedge \\ (
+\forall name, state\_fips.(
+\exists x_1. states( name, state\_fips, x_1))
+ ) \longrightarrow natural\_event(country, id, \\ locationname, lat, lon,  regionname, area, year, month, day, hour, min, sec, \\ dmg\_amt\_tot, dmg\_amt\_order, dmg\_mill, dmg\_mill\_tot, deaths\_tot, \\ deaths, deaths\_ord, deaths\_ord\_tot, injuries, inj\_ord, inj\_tot, \\ inj\_ord\_tot, missing, miss\_ord, miss\_tot, miss\_ord\_tot, houses\_destr, \\ houses\_destr\_ord, houses\_destr\_tot, houses\_destr\_ord\_tot, houses\_dmg, \\ houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot, event\_type =  'tornado')
+\end{multline} 
+
+\section{Partial Equations}
+
+\subsection{natural\_event\_earthquake}
+
+\begin{multline}
+(\forall country, id, locationname, lat, lon, regionname, area, year, month, day, hour, min, sec.( \\
+\exists x_1,..., x_{11}. 
+earthquakes\_by\_country(country, ..., sec, 
+x_1,... x_{11}))) \wedge \\ (\forall dmg\_amt\_tot, dmg\_amt\_order, id, dmg\_mill, dmg\_mill\_tot.( \\
+\exists x_1, ..., x_{17}. earthquakes\_by\_damage(dmg\_amt\_tot, ..., dmg\_mill\_tot, x_1, ..., x_{17}))) \wedge \\ 
+(\forall deaths\_tot, id, deaths, deaths\_ord, deaths\_ord\_tot.( \\
+\exists x_1, ..., x_{17}. earthquakes\_by\_deaths(deaths\_tot, ..., deaths\_ord\_tot, x_1, ..., x_{17}))) \wedge \\ 
+(\forall id, injuries, inj\_ord, inj\_tot, inj\_ord\_tot.(\\
+\exists x_1, ..., x_{17}. earthquakes\_by\_injuries(id, ..., inj\_ord\_tot, x_1, ..., x_{17})))
+ \wedge \\ (\forall id, missing, miss\_ord, miss\_tot, miss\_ord\_tot.( \\
+\exists x_1, ..., x_{17}. earthquakes\_by\_missing(id, ..., inj\_ord\_tot, x_1, ..., x_{17})))
+ \wedge \\ (\forall id, houses\_destr, houses\_destr\_ord, houses\_destr\_tot, \\ houses\_destr\_ord\_tot, houses\_dmg, houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot.( \\
+\exists x_1, ..., x_{13}. earthquakes\_by\_houses\_damages(id, ..., houses\_dmg\_ord\_tot, x_1, ..., x_{17})))
+\end{multline} 
+
+\subsection{natural\_event\_tsunami}
+\begin{multline}
+\forall id,  event\_ts,  country,  location,  lat,  lon,  deaths\_ord,  dmg\_ord,  \\ deaths\_ord\_tot,  dmg\_ord\_tot,  houses\_destr\_ord,  deaths\_tot,  houses\_destr\_ord\_tot, \\ deaths,  houses\_dmgd\_ord,  houses\_dmgd\_ord\_tot,  houses\_destr,  houses\_destr\_tot,  area, \\ inj,  inj\_ord,  inj\_tot,  inj\_ord\_tot,  houses\_dmgd,  houses\_dmgd\_tot,  miss\_tot, \\ miss\_ord\_tot,  dmg\_mill\_tot,  dmg\_mill,  miss,  miss\_ord,  region,  event\_type,  year,  month,  day,  hour,  min,  sec.( \\
+\exists x_1, ..., x_{23}. tsunami(id, ..., sec, x_1, ..., x_{23}))
+\end{multline} 
+
+\subsection{natural\_event\_eruption}
+\begin{multline}
+(\forall dmg\_ord,  houses\_destr,  inj,  location,  lon,  miss,  dmg\_ord\_tot,  \\ houses\_destr\_ord,  inj\_ord,  miss\_ord,  country,  dmg\_mill,  houses\_destr\_ord\_tot, \\  inj\_ord\_tot,  miss\_ord\_tot,  dmg\_mill\_tot,  houses\_destr\_tot,  inj\_tot,  miss\_tot,  \\  event\_ts,  id, lat,  deaths,  deaths\_ord,  deaths\_ord\_tot,  deaths\_tot,  \\ houses\_dmgd\_ord\_tot,  houses\_dmgd\_ord,  houses\_dmgd,  houses\_dmgd\_tot,  volcano\_id, \\  year,  month,  day,  hour,  min,  sec.(\\
+\exists x_1, ..., x_{8}. eruptions(dmg\_ord, ..., sec, x_1, ..., x_{8}))) \wedge \\ 
+(\forall id, volcano\_id, region.(
+\exists x_1,..., x_{13}. 
+volcanoes(id, volcano\_id, region, 
+x_1,... x_{13})))
+\end{multline} 
+
+\subsection{natural\_event\_tornado}
+\begin{multline}
+(\forall trace\_id, injuries, deaths, dmg\_mill, lat, lon, state\_fips, dmg\_mill\_tot, dmg\_ord,\\  dmg\_ord\_tot, inj\_tot, inj\_ord, inj\_ord\_tot, missing, miss\_tot, \\ miss\_ord\_tot, miss\_ord, houses\_destr, houses\_destr\_tot, houses\_destr\_ord, \\ houses\_destr\_ord\_tot, deaths\_tot, deaths\_ord, deaths\_ord\_tot, country, regionname, \\ houses\_dmg, houses\_dmg\_tot, houses\_dmg\_ord\_tot, houses\_dmg\_ord, year, month, day, hour, min, sec.( \\
+\exists x_1, ..., x_{18}. traces(trace\_id, ..., sec, x_1, ..., x_{18})))  \wedge \\ 
+(\forall trace\_id, county\_fips.(
+\exists x_1, ..., x_{2}. trace\_affected\_counties(trace\_id, county\_fips, order\_idx=1, x_{2})))
+ \wedge \\ (
+ \forall name, county\_fips.(
+\exists x_1, ..., x_{3}. county(name, county\_fips, x_1, ..., x_{3}))
+ ) \wedge \\ (
+\forall name, state\_fips.(
+\exists x_1. states( name, state\_fips, x_1))
+ )
+\end{multline} 
+
+
+
+\subsection{enriched\_traces\_w\_counties}
+\begin{multline}
+(\forall trace\_id, injuries, deaths, dmg\_mill, lat, lon, state\_fips, dmg\_mill\_tot, dmg\_ord,\\  dmg\_ord\_tot, inj\_tot, inj\_ord, inj\_ord\_tot, missing, miss\_tot, \\ miss\_ord\_tot, miss\_ord, houses\_destr, houses\_destr\_tot, houses\_destr\_ord, \\ houses\_destr\_ord\_tot, deaths\_tot, deaths\_ord, deaths\_ord\_tot, country, regionname, \\ houses\_dmg, houses\_dmg\_tot, houses\_dmg\_ord\_tot, houses\_dmg\_ord, year, month, day, hour, min, sec.( \\
+\exists x_1, ..., x_{18}. traces(trace\_id, ..., sec, x_1, ..., x_{18})))  \wedge \\ 
+(\forall trace\_id, county\_fips.(
+\exists x_1, ..., x_{2}. trace\_affected\_counties(trace\_id, county\_fips, order\_idx=1, x_{2})))
+ \wedge \\ (
+ \forall name, county\_fips.(
+\exists x_1, ..., x_{3}. county(name, county\_fips, x_1, ..., x_{3}))
+ )
+\end{multline} 
+
+\subsection{enriched\_traces\_w\_area}
+\begin{multline}
+(\forall trace\_id, injuries, deaths, dmg\_mill, lat, lon, state\_fips, dmg\_mill\_tot, dmg\_ord,\\  dmg\_ord\_tot, inj\_tot, inj\_ord, inj\_ord\_tot, missing, miss\_tot, \\ miss\_ord\_tot, miss\_ord, houses\_destr, houses\_destr\_tot, houses\_destr\_ord, \\ houses\_destr\_ord\_tot, deaths\_tot, deaths\_ord, deaths\_ord\_tot, country, regionname, \\ houses\_dmg, houses\_dmg\_tot, houses\_dmg\_ord\_tot, houses\_dmg\_ord, year, month, day, hour, min, sec.( \\
+\exists x_1, ..., x_{18}. traces(trace\_id, ..., sec, x_1, ..., x_{18})))  \wedge \\ 
+(\forall trace\_id, city\_fips.(
+\exists x_1, ..., x_{2}. trace\_affected\_cities(trace\_id, city\_fips, order\_idx=1, x_{2})))
+ \wedge \\ (
+ \forall name, city\_fips.(
+\exists x_1, ..., x_{3}. county(name, city\_fips, x_1, ..., x_{3}))
+ )
+\end{multline} 
+
+
+
+\subsection{earthquake\_base\_info}
+\begin{multline}
+\forall country, id, locationname, lat, lon, regionname, area, year, month, day, hour, min, sec.( \\
+\exists x_1,..., x_{11}. 
+earthquakes\_by\_country(country, ..., sec, 
+x_1,... x_{11}))
+\end{multline}
+
+
+\subsection{earthquake\_damage\_view}
+
+\begin{multline}
+\forall dmg\_amt\_tot, dmg\_amt\_order, id, dmg\_mill, dmg\_mill\_tot.(\\
+\exists x_1, ..., x_{17}. earthquakes\_by\_damage(dmg\_amt\_tot, ..., dmg\_mill\_tot, x_1, ..., x_{17}))
+\end{multline} 
+
+\subsection{earthquakes\_deaths\_view}
+
+\begin{multline}
+\forall deaths\_tot, id, deaths, deaths\_ord, deaths\_ord\_tot.(\\
+\exists x_1, ..., x_{17}. earthquakes\_by\_deaths(deaths\_tot, ..., deaths\_ord\_tot, x_1, ..., x_{17}))
+\end{multline} 
+
+\subsection{earthquakes\_by\_houses\_damages}
+
+\begin{multline}
+\forall id, houses\_destr, houses\_destr\_ord, houses\_destr\_tot, houses\_destr\_ord\_tot, houses\_dmg, \\ houses\_dmg\_ord, houses\_dmg\_tot, houses\_dmg\_ord\_tot.(\\
+\exists x_1, ..., x_{13}. earthquakes\_by\_houses\_damages(id, ..., houses\_dmg\_ord\_tot, x_1, ..., x_{17}))
+\end{multline}
+
+\subsection{earthquakes\_injuries}
+
+\begin{multline}
+\forall id, injuries, inj\_ord, inj\_tot, inj\_ord\_tot.(\\
+\exists x_1, ..., x_{17}. earthquakes\_by\_injuries(id, ..., inj\_ord\_tot, x_1, ..., x_{17}))
+\end{multline} 
+
+\subsection{earthquakes\_magnitude\_view}
+
+
+\begin{multline}
+\forall id, mag, mag\_ms, mag\_ml, mag\_mw, mag\_mb, mag\_mfa, mag\_unk.(\\
+\exists x_1, ..., x_{19}. earthquakes\_by\_magnitude(id, ..., mag\_unk, x_1, ..., x_{19}))
+\end{multline} 
+
+\subsection{earthquakes\_missing}
+
+\begin{multline}
+\forall id, missing, miss\_ord, miss\_tot, miss\_ord\_tot.(\\
+\exists x_1, ..., x_{17}. earthquakes\_by\_missing(id, ..., inj\_ord\_tot, x_1, ..., x_{17}))
+\end{multline} 
+
+\subsection{earthquakes\_specific\_info}
+
+\begin{multline}
+\forall id, intensity, depth.(
+\exists x_1, ..., x_{21}. earthquakes\_by\_country(id, intensity, depth, x_1, ..., x_{21}))
+\end{multline} 
+
+
+\subsection{enriched\_traces}
+
+\begin{multline}
+\forall id, injuries, deaths, dmg\_mill, lat, lon, state\_fips, dmg\_mill\_tot, dmg\_ord, dmg\_ord\_tot, \\ inj\_tot, inj\_ord, inj\_ord\_tot, missing, miss\_tot, miss\_ord\_tot, miss\_ord, houses\_destr, \\ houses\_destr\_tot, houses\_destr\_ord, houses\_destr\_ord\_tot, deaths\_tot, \\ deaths\_ord, deaths\_ord\_tot, country, regionname, houses\_dmg, houses\_dmg\_tot,\\ houses\_dmg\_ord\_tot, houses\_dmg\_ord, year, month, day, hour, min, sec.(\\
+\exists x_1, ..., x_{18}. traces(id, ..., sec, x_1, ..., x_{18}))
+\end{multline} 
+
+\subsection{eruption\_enriched}
+
+\begin{multline}
+\forall dmg\_ord,  houses\_destr,  inj,  location,  lon,  miss,  dmg\_ord\_tot,  houses\_destr\_ord,  inj\_ord,  miss\_ord, \\  country,  dmg\_mill,  houses\_destr\_ord\_tot,  inj\_ord\_tot,  miss\_ord\_tot, \\ dmg\_mill\_tot,  houses\_destr\_tot,  inj\_tot,  miss\_tot,  event\_ts,\\  id,  lat,  deaths,  deaths\_ord,  deaths\_ord\_tot,  deaths\_tot,  houses\_dmgd\_ord\_tot,\\  houses\_dmgd\_ord,  houses\_dmgd,  houses\_dmgd\_tot,  volcano\_id,  year,  month,  day,  hour,  min,  sec.(\\
+\exists x_1, ..., x_{8}. eruptions(dmg\_ord, ..., sec, x_1, ..., x_{8}))
+\end{multline} 
+
+\subsection{first\_trace\_affected\_cities}
+
+\begin{multline}
+\forall trace\_id, city\_fips.(
+\exists x_1, ..., x_{2}. trace\_affected\_cities(trace\_id, city\_fips, order\_idx=1, x_{2}))
+\end{multline} 
+
+\subsection{first\_trace\_affected\_counties}
+
+\begin{multline}
+\forall trace\_id, county\_fips.(
+\exists x_1, ..., x_{2}. trace\_affected\_counties(trace\_id, county\_fips, order\_idx=1, x_{2}))
+\end{multline} 
+
+\subsection{link\_earthquake\_eruption}
+
+\begin{multline}
+\forall earthquake\_id, eruption\_id.(\\
+\exists x_1, ..., x_{22}. earthquakes\_by\_country('earthquake\_' + earthquake\_id,'eruption\_' +  eruption\_id, x_1, ..., x_{22}))
+\end{multline} 
+
+\subsection{link\_earthquake\_tsunami}
+
+\begin{multline}
+\forall earthquake\_id, tsunami\_id.(\\
+\exists x_1, ..., x_{22}. earthquakes\_by\_country('earthquake\_' + earthquake\_id,'tsunami\_' +  tsunami\_id, x_1, ..., x_{22}))
+\end{multline} 
+
+\subsection{link\_eruption\_earthquake}
+
+\begin{multline}
+\forall earthquake\_id, eruption\_id.(\\
+\exists x_1, ..., x_{40}. eruptions('earthquake\_' + earthquake\_id,'eruption\_' +  eruption\_id, x_1, ..., x_{40}))
+\end{multline} 
+
+\subsection{link\_eruption\_tsunami}
+
+\begin{multline}
+\forall tsunami\_id, eruption\_id.(\\
+\exists x_1, ..., x_{40}. eruptions('tsunami\_' + tsunami\_id,'eruption\_' +  eruption\_id, x_1, ..., x_{40}))
+\end{multline} 
+
+
+\subsection{link\_traces}
+
+\begin{multline}
+\forall trace\_id, tornado\_id, order\_idx.(\\
+\exists x_1, ..., x_{21}. traces('tornado\_' + trace\_id, tornado\_id, order\_idx, x_1, ..., x_{21}))
+\end{multline} 
+
+\subsection{link\_tsunami\_earthquake}
+
+\begin{multline}
+\forall tsunami\_id, earthquake\_id.(\\
+\exists x_1, ..., x_{56}. tsunami('tsunami\_' + tsunami\_id,'earthquake\_' +  earthquake\_id, x_1, ..., x_{56}))
+\end{multline} 
+
+\subsection{link\_tsunami\_eruption}
+
+\begin{multline}
+\forall tsunami\_id, eruption\_id.(\\
+\exists x_1, ..., x_{56}. tsunami('tsunami\_' + tsunami\_id,'eruption\_' +  eruption\_id, x_1, ..., x_{56}))
+\end{multline} 
+
+
+\section{Loading Mappings}
+
+\subsection{Classic Metrics}
+
+\begin{align*}
+\text{dim\_date} &= \pi_{\begin{subarray}{l}
+                    \text{event\_date} \leftarrow  f_1(\text{event\_year}, \text{event\_month}, \text{event\_day}), 
+                    \text{id}, \\
+                    \text{event\_year}, 
+                    \text{event\_month},
+                    \text{event\_day}, \\
+                    \text{event\_quarter} = f_2(\text{event\_month}), \\
+                    \text{event\_millennium} = \lfloor \text{event\_year} / 1000 \rfloor, \\
+                    \text{event\_century} = \lfloor \text{event\_year} / 100 \rfloor
+                   \end{subarray}} (\text{natural\_event})
+\end{align*}
+
+\begin{align*}
+\hspace{-2.8cm} \text{dim\_place} &= \pi_{\begin{subarray}{l}
+                    \text{event\_location}, \\
+                    \text{region}, 
+                    \text{area} \leftarrow  f(\text{area}), \\
+                    \text{country}, 
+                    \text{id}
+                   \end{subarray}} (\text{natural\_event})
+\end{align*}
+
+\begin{align*}
+\hspace{-1.4cm} \text{dim\_time} &= \pi_{\begin{subarray}{l}
+                    \text{event\_time} \leftarrow  f_1(\text{event\_hour}, \text{event\_minute}), \\
+                    \text{id}, 
+                    \text{event\_hour}, 
+                    \text{event\_minute}, \\
+                    \text{event\_second}, 
+                    \text{event\_daytime} \leftarrow  f_2(\text{event\_hour})
+                   \end{subarray}} (\text{natural\_event})
+\end{align*}
+
+\subsection{EventType Metrics}
+
+\begin{align*}
+\hspace{-2.1cm} \text{dim\_earthquake} &= \pi_{\begin{subarray}{l}
+                    \text{intensity}, 
+                    \text{eqdepth}, 
+                    \text{eqmagnitude}, \\
+                    \text{eqmagms}, 
+                    \text{eqmagml}, 
+                    \text{eqmagmw}, \\
+                    \text{eqmagmb}, 
+                    \text{eqmagmfa}, 
+                    \text{eqmagunk}, \\
+                    \text{natural\_event\_id}
+                   \end{subarray}} (\text{earthquake})
+\end{align*}
+
+\begin{align*}
+\hspace{0.5cm}\text{dim\_eruption} &= \pi_{\begin{subarray}{l}
+                    \text{eruption}, 
+                    \text{significant}, 
+                    \text{vei}, 
+                    \text{agent}, \\
+                    \text{eruption\_status}, 
+                    \text{natural\_event\_id}, \\
+                    \text{elevation}, 
+                    \text{morphology}, 
+                    \text{volcano\_name}, 
+                    \text{timeerupt}
+                   \end{subarray}} (\text{eruption} \bowtie_{\text{eruption.volcano\_id} = \text{volcano.id}} \text{volcano})
+\end{align*}
+
+
+
+\begin{align*}
+\hspace{-2.2cm} \text{dim\_tornado\_trace} &= \pi_{\begin{subarray}{l}
+                    \text{f\_scale}, 
+                    \text{trace\_length}, \\
+                    \text{width}, 
+                    \text{alteredmagnitude},\\ 
+                    \text{order\_idx}, 
+                    \text{natural\_event\_\_id}
+                   \end{subarray}} (\text{tornado\_trace})
+\end{align*}
+
+\begin{align*}
+\hspace{-1.6cm} \text{dim\_tsunami} &= \pi_{\begin{subarray}{l\\}
+   \text{numdeposits}, 
+   \text{numrunups}, 
+   \text{tsintensity},\\ 
+   \text{oceanictsunami}, 
+   \text{maxwaterheight}, 
+   \text{eqmagnitude}, \\
+   \text{tsmtii}, 
+   \text{eqdepth}, 
+   \text{tsmtabe}, \\
+   \text{cause}, 
+   \text{warningstatus}, 
+   \text{natural\_event\_id}
+\end{subarray}} (\text{tsunami})
+\end{align*}
+
+\subsection{Fact Table}
+
+
+\begin{align*}
+\hspace{-3.6cm} \text{fact\_natural\_event} &= 
+\pi_{\begin{subarray}{l}
+   \text{damageamountordertotal}, 
+   \text{damageamountorder}, 
+   \text{damagemillionsdollars}, 
+   \text{damagemillionsdollarstotal}, 
+   \text{deathstotal}, \\
+   \text{deaths}, 
+   \text{deathsamountorder}, 
+   \text{deathsamountordertotal}, 
+   \text{housesdestroyed}, 
+   \text{housesdestroyedamountorder}, \\
+   \text{housesdestroyedtotal}, 
+   \text{housesdestroyedamountordertotal}, 
+   \text{housesdamaged}, 
+   \text{housesdamagedamountorder}, \\
+   \text{housesdamagedtotal}, 
+   \text{housesdamagedamountordertotal}, 
+   \text{injuries}, 
+   \text{injuriesamountorder}, \\
+   \text{injuriestotal}, 
+   \text{injuriesamountordertotal}, 
+   \text{missing}, 
+   \text{missingamountorder}, 
+   \text{missingtotal}, \\
+   \text{missingamountordertotal}, 
+   \text{place\_id} \leftarrow \text{id}, 
+   \text{time\_id} \leftarrow \text{id}, 
+   \text{date\_id} \leftarrow \text{id}, 
+   \text{deadly} \leftarrow max(\text{deaths}, \text{deathstotal})>0, \\
+   \text{multiple\_event} \leftarrow f_2(\text{related\_event.event2\_id}, \text{related\_event1.event1\_id}), 
+   \text{eruption\_id} \leftarrow concat(\text{event\_type}, \text{id}), \\
+   \text{earthquake\_id} \leftarrow concat(\text{event\_type}, \text{id}), 
+   \text{tsunami\_id} \leftarrow concat(\text{event\_type}, \text{id}), \\
+   \text{tornado\_id} \leftarrow concat(\text{event\_type}, \text{id}), 
+   \text{milliondollarscropsdamage}
+\end{subarray}} \\
+&\quad ((\text{natural\_event} \bowtie_{\text{id} = \text{event\_id}} (\pi_{event\_id \leftarrow event1\_id}(\text{related\_event}) \cup 
+\pi_{event\_id \leftarrow event2\_id}(\text{related\_event}))
+\end{align*}
+
+\newpage
+\section{Queries}
+
+\subsection{Roll-up}
+
+\begin{align*}
+\gamma_{\text{year}, \, \text{total\_deaths} \leftarrow \mathcal{SUM}(\text{deaths})} 
+(\text{Fact\_Natural\_Event} \bowtie_{date\_id=id} \text{Dim\_Date})
+\end{align*}
+
+\subsection{Drill-down}
+
+\begin{align*}
+\gamma_{\text{region}, \, \text{total\_damage\_millions\_dollars} \leftarrow \mathcal{SUM}(\text{damage\_millions\_dollars})} 
+(\text{Fact\_Natural\_Event} \bowtie_{place\_id=id} \text{Dim\_Place})
+\end{align*}
+
+\begin{align*}
+\gamma_{\text{area}, \, \text{total\_damage\_millions\_dollars} \leftarrow \mathcal{SUM}(\text{damage\_millions\_dollars})} 
+(\text{Fact\_Natural\_Event} \bowtie_{place\_id=id} \text{Dim\_Place})
+\end{align*}
+
+\subsection{Slice}
+
+\begin{align*}
+ \hspace{-3cm} \gamma_{\text{year}, \, \text{total\_deaths} \leftarrow \mathcal{SUM}(\text{deaths})} 
+(\sigma_{\text{volcano\_name} = \text{'Etna'}}(
+ (\text{Fact\_Natural\_Event} \bowtie_{date\_id=id} \text{Dim\_Date}) \bowtie_{eruption\_id=id} \text{Dim\_Eruption}))
+\end{align*}
+
+\subsection{Slice and Dice}
+
+\begin{align*}
+ \hspace{-3.5cm} \gamma_{\text{year}, \, \text{total\_deaths} \leftarrow \mathcal{SUM}(\text{deaths})} 
+(\sigma_{\text{damage\_millions\_dollars} > 0}(\text{Fact\_Natural\_Event} \bowtie_{date\_id=id} \text{Dim\_Date}) \bowtie_{earthquake\_id=id} \text{Dim\_Earthquake})
+\end{align*}
+
+
+
+\end{document}
