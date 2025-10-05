@@ -1,0 +1,7 @@
+{
+  "name": "local",
+  "description": "Local workflow engine",
+  "engineRunConfiguration": {
+    "Local": {}
+  }
+}

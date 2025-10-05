@@ -1,9 +1,0 @@
-{
-  "auth_header_value": "",
-  "auth_header_name": "",
-  "virtualPath": "",
-  "auth_header_prefix": "",
-  "base_url": "http://localhost:9200/tsunami_events/_search",
-  "name": "tsunami",
-  "test_url": "http://localhost:9200/tsunami_events/_search"
-}

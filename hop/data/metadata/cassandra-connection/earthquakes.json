@@ -5,7 +5,7 @@
   "schemaPort": "9042",
   "localDataCenter": "datacenter1",
   "port": "9042",
-  "schemaHostname": "localhost",
+  "schemaHostname": "cassandra",
   "name": "earthquakes",
   "socketTimeout": "10000",
   "username": "cassandra",

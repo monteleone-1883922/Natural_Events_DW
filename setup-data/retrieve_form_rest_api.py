@@ -222,7 +222,8 @@ def setup_tornadoes():
         ((pl.col("ns") == 1) & (pl.col("sn") == 1) & (pl.col("sg") == 1)) |
         ((pl.col("ns") != 1) & (pl.col("sn") == 0) & (pl.col("sg") == 1))
     ).unique().with_row_index(name='unique_id', offset=0)
-    traces_df = df.filter((pl.col("ns") != 1) & (pl.col("sn") == 1) & (pl.col("sg") == 2)) \
+    traces_df = df.filter(((pl.col("ns") != 1) & (pl.col("sn") == 1) & (pl.col("sg") == 2)) |
+                          ((pl.col("ns") == 1) & (pl.col("sn") == 1) & (pl.col("sg") == 1))) \
         .rename({"id": "tornado_id"}) \
         .with_row_index(name='id', offset=0).unique()
     link_counties_df = df.filter((pl.col("sg") == -9)).with_columns(

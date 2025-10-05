@@ -216,15 +216,20 @@ services:
       timeout: 10s
       retries: 3
   hop:
-    image: apache/hop:2.15.0
+    build:
+      context: ./hop/script
+      dockerfile: Dockerfile
     container_name: apache_hop
+    user: root
     ports:
       - "8086:8080"
     volumes:
-      - ./hop:/project
-      - ./hop/hop-server.xml:/usr/local/tomcat/webapps/hop/config/hop-server.xml
+      - ./hop/data:/project
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker-compose.yml:/docker-compose.yml:ro
     environment:
       PROJECT_HOME: /project
+      HOP_CONFIG_FOLDER: /project
       HOP_PROJECT_DIRECTORY: /project
       HOP_PROJECT_NAME: project
       HOP_SERVER_USER: admin
@@ -234,38 +239,36 @@ services:
       HOP_DATABASE_NAME: integration_db
       HOP_DATABASE_USER: user
       HOP_DATABASE_PASSWORD: password1234
-  dbt:
-    image: xemuliam/dbt:1.10-databricks
-    container_name: dbt_transform
-    volumes:
-      - ./dbt:/usr/app
-    working_dir: /usr/app
-    entrypoint: [ "dbt" ]
-#    depends_on:
-#      - postgres
-  ontop:
-    image: ontop/ontop:5.3.0
-    container_name: ontop_server
-    ports:
-      - "8085:8080"
-    volumes:
-      - ./ontop:/opt/ontop/config
+    working_dir: /project
+    healthcheck:
+      test: [ "CMD-SHELL", "pgrep -f 'hop-server' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    entrypoint: [ "/bin/bash", "-c" ]
     command: >
-      /opt/ontop/ontop endpoint
-      --mapping=/opt/ontop/config/mapping.obda
-      --ontology=/opt/ontop/config/ontology.owl
-      --properties=/opt/ontop/config/ontop.properties
-#    depends_on:
-#      - postgres
-#    depends_on:
-#      elasticsearch_seed:
-#        condition: service_completed_successfully
-#      cassandra_seed:
-#        condition: service_completed_successfully
-#      mongodb_seed:
-#        condition: service_completed_successfully
-#      neo4j_seed:
-#        condition: service_completed_successfully
+      "sleep 10 &&
+      echo 'Executing workflow...' &&
+      cd /project && 
+      /opt/hop/hop-run.sh 
+      --project=project 
+      --file=/project/workflows/staging_step.hwf 
+      --runconfig=local 
+      --level=Basic &&
+      echo 'Workflow completed!' &&
+      tail -f /dev/null"
+    restart: "no"
+  metabase:
+      image: metabase/metabase:v0.56.3
+      container_name: metabase
+      ports:
+        - "3000:3000"
+      environment:
+        - MB_DB_FILE=/metabase.db/metabase.db
+      volumes:
+        - ./metabase/data:/metabase.db
+
 
 
 

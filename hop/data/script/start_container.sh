@@ -15,6 +15,6 @@ fi
 
 echo "Starting container $SERVICE_NAME..."
 
-docker compose -f ../../docker-compose.yml up "$SERVICE_NAME"
+docker compose -f /docker-compose.yml up "$SERVICE_NAME"
 
 echo "Container $SERVICE_NAME has completed."

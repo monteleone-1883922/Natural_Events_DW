@@ -36,8 +36,23 @@
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>input_earthquakes_by_total_damage</from>
-      <to>output_earthquakes_by_total_damage</to>
+      <from>input_earthquakes_by_deaths</from>
+      <to>output_earthquakes_by_deaths</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>input_earthquakes_by_missing</from>
+      <to>output_earthquakes_by_missing</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>input_earthquakes_by_houses_damages</from>
+      <to>output_earthquakes_by_houses_damages</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>input_earthquakes_by_injuries</from>
+      <to>output_earthquakes_by_injuries</to>
       <enabled>Y</enabled>
     </hop>
   </order>
@@ -63,27 +78,6 @@
     </GUI>
   </transform>
   <transform>
-    <name>input_earthquakes_by_damage</name>
-    <type>CassandraInput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <connection>earthquakes</connection>
-    <cql_select_query>SELECT * FROM earthquakes_by_damage;</cql_select_query>
-    <execute_for_each_row>N</execute_for_each_row>
-    <max_length/>
-    <attributes/>
-    <GUI>
-      <xloc>544</xloc>
-      <yloc>208</yloc>
-    </GUI>
-  </transform>
-  <transform>
     <name>input_earthquakes_by_magnitude</name>
     <type>CassandraInput</type>
     <description/>
@@ -102,27 +96,6 @@
     <GUI>
       <xloc>544</xloc>
       <yloc>368</yloc>
-    </GUI>
-  </transform>
-  <transform>
-    <name>input_earthquakes_by_total_damage</name>
-    <type>CassandraInput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <connection>earthquakes</connection>
-    <cql_select_query>SELECT * FROM earthquakes_by_total_damage;</cql_select_query>
-    <execute_for_each_row>N</execute_for_each_row>
-    <max_length/>
-    <attributes/>
-    <GUI>
-      <xloc>544</xloc>
-      <yloc>128</yloc>
     </GUI>
   </transform>
   <transform>
@@ -160,43 +133,6 @@
     </GUI>
   </transform>
   <transform>
-    <name>output_earthquakes_by_damage</name>
-    <type>TableOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <commit>10000</commit>
-    <connection>postgres_staging</connection>
-    <fields>
-</fields>
-    <ignore_errors>N</ignore_errors>
-    <only_when_have_rows>N</only_when_have_rows>
-    <partitioning_daily>N</partitioning_daily>
-    <partitioning_enabled>N</partitioning_enabled>
-    <partitioning_field/>
-    <partitioning_monthly>Y</partitioning_monthly>
-    <return_field/>
-    <return_keys>N</return_keys>
-    <schema>"public"</schema>
-    <specify_fields>N</specify_fields>
-    <table>earthquakes_by_damage</table>
-    <tablename_field/>
-    <tablename_in_field>N</tablename_in_field>
-    <tablename_in_table>Y</tablename_in_table>
-    <truncate>Y</truncate>
-    <use_batch>Y</use_batch>
-    <attributes/>
-    <GUI>
-      <xloc>848</xloc>
-      <yloc>208</yloc>
-    </GUI>
-  </transform>
-  <transform>
     <name>output_earthquakes_by_magnitude</name>
     <type>TableOutput</type>
     <description/>
@@ -231,7 +167,112 @@
     </GUI>
   </transform>
   <transform>
-    <name>output_earthquakes_by_total_damage</name>
+    <name>input_earthquakes_by_damage</name>
+    <type>CassandraInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>earthquakes</connection>
+    <cql_select_query>SELECT * FROM earthquakes_by_damage;</cql_select_query>
+    <execute_for_each_row>N</execute_for_each_row>
+    <max_length/>
+    <attributes/>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>input_earthquakes_by_deaths</name>
+    <type>CassandraInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>earthquakes</connection>
+    <cql_select_query>SELECT * FROM earthquakes_by_deaths;</cql_select_query>
+    <execute_for_each_row>N</execute_for_each_row>
+    <max_length/>
+    <attributes/>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>528</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>input_earthquakes_by_houses_damages</name>
+    <type>CassandraInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>earthquakes</connection>
+    <cql_select_query>SELECT * FROM earthquakes_by_houses_damages;</cql_select_query>
+    <execute_for_each_row>N</execute_for_each_row>
+    <max_length/>
+    <attributes/>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>128</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>input_earthquakes_by_injuries</name>
+    <type>CassandraInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>earthquakes</connection>
+    <cql_select_query>SELECT * FROM earthquakes_by_injuries;</cql_select_query>
+    <execute_for_each_row>N</execute_for_each_row>
+    <max_length/>
+    <attributes/>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>208</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>input_earthquakes_by_missing</name>
+    <type>CassandraInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <connection>earthquakes</connection>
+    <cql_select_query>SELECT * FROM earthquakes_by_missing;</cql_select_query>
+    <execute_for_each_row>N</execute_for_each_row>
+    <max_length/>
+    <attributes/>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>608</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>output_earthquakes_by_damage</name>
     <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
@@ -249,11 +290,162 @@
     <only_when_have_rows>N</only_when_have_rows>
     <partitioning_daily>N</partitioning_daily>
     <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
     <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
     <return_keys>N</return_keys>
     <schema>"public"</schema>
     <specify_fields>N</specify_fields>
-    <table>earthquakes_by_total_damage</table>
+    <table>earthquakes_by_damage</table>
+    <tablename_field/>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_in_table>Y</tablename_in_table>
+    <truncate>Y</truncate>
+    <use_batch>Y</use_batch>
+    <attributes/>
+    <GUI>
+      <xloc>848</xloc>
+      <yloc>448</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>output_earthquakes_by_deaths</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <commit>10000</commit>
+    <connection>postgres_staging</connection>
+    <fields>
+</fields>
+    <ignore_errors>N</ignore_errors>
+    <only_when_have_rows>N</only_when_have_rows>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
+    <return_keys>N</return_keys>
+    <schema>"public"</schema>
+    <specify_fields>N</specify_fields>
+    <table>earthquakes_by_deaths</table>
+    <tablename_field/>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_in_table>Y</tablename_in_table>
+    <truncate>Y</truncate>
+    <use_batch>Y</use_batch>
+    <attributes/>
+    <GUI>
+      <xloc>848</xloc>
+      <yloc>528</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>output_earthquakes_by_missing</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <commit>10000</commit>
+    <connection>postgres_staging</connection>
+    <fields>
+</fields>
+    <ignore_errors>N</ignore_errors>
+    <only_when_have_rows>N</only_when_have_rows>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
+    <return_keys>N</return_keys>
+    <schema>"public"</schema>
+    <specify_fields>N</specify_fields>
+    <table>earthquakes_by_missing</table>
+    <tablename_field/>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_in_table>Y</tablename_in_table>
+    <truncate>Y</truncate>
+    <use_batch>Y</use_batch>
+    <attributes/>
+    <GUI>
+      <xloc>848</xloc>
+      <yloc>608</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>output_earthquakes_by_injuries</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <commit>10000</commit>
+    <connection>postgres_staging</connection>
+    <fields>
+</fields>
+    <ignore_errors>N</ignore_errors>
+    <only_when_have_rows>N</only_when_have_rows>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
+    <return_keys>N</return_keys>
+    <schema>"public"</schema>
+    <specify_fields>N</specify_fields>
+    <table>earthquakes_by_injuries</table>
+    <tablename_field/>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_in_table>Y</tablename_in_table>
+    <truncate>Y</truncate>
+    <use_batch>Y</use_batch>
+    <attributes/>
+    <GUI>
+      <xloc>848</xloc>
+      <yloc>208</yloc>
+    </GUI>
+  </transform>
+  <transform>
+    <name>output_earthquakes_by_houses_damages</name>
+    <type>TableOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <commit>10000</commit>
+    <connection>postgres_staging</connection>
+    <fields>
+</fields>
+    <ignore_errors>N</ignore_errors>
+    <only_when_have_rows>N</only_when_have_rows>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
+    <return_keys>N</return_keys>
+    <schema>"public"</schema>
+    <specify_fields>N</specify_fields>
+    <table>earthquakes_by_houses_damages</table>
+    <tablename_field/>
     <tablename_in_field>N</tablename_in_field>
     <tablename_in_table>Y</tablename_in_table>
     <truncate>Y</truncate>
