@@ -1,3 +1,6 @@
+import os
+import subprocess
+
 from retrieve_form_rest_api import setup
 from pathlib import Path
 
@@ -6,7 +9,7 @@ DATABASES = ["neo4j", "cassandra", "elasticsearch", "mongodb", "postgres", "meta
 
 def create_directories():
     for database in DATABASES:
-        Path(DIR_TO_CREATE.format(database=database)).mkdir()
+        Path(DIR_TO_CREATE.format(database=database)).mkdir(exist_ok=True, parents=True)
     print("Data directories created")
 
 if __name__ == '__main__':
