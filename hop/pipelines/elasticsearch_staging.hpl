@@ -137,6 +137,10 @@
     <connection>postgres_staging</connection>
     <fields>
       <field>
+        <column_name>warningStatusId</column_name>
+        <stream_name>warningStatusId</stream_name>
+      </field>
+      <field>
         <column_name>area</column_name>
         <stream_name>area</stream_name>
       </field>
@@ -153,6 +157,14 @@
         <stream_name>country</stream_name>
       </field>
       <field>
+        <column_name>damageamountorder</column_name>
+        <stream_name>damageamountorder</stream_name>
+      </field>
+      <field>
+        <column_name>damageamountordertotal</column_name>
+        <stream_name>damageamountordertotal</stream_name>
+      </field>
+      <field>
         <column_name>damageMillionsDollars</column_name>
         <stream_name>damageMillionsDollars</stream_name>
       </field>
@@ -163,6 +175,14 @@
       <field>
         <column_name>deaths</column_name>
         <stream_name>deaths</stream_name>
+      </field>
+      <field>
+        <column_name>deathsamountorder</column_name>
+        <stream_name>deathsamountorder</stream_name>
+      </field>
+      <field>
+        <column_name>deathsamountordertotal</column_name>
+        <stream_name>deathsamountordertotal</stream_name>
       </field>
       <field>
         <column_name>deathsTotal</column_name>
@@ -189,16 +209,16 @@
         <stream_name>eventValidity</stream_name>
       </field>
       <field>
-        <column_name>latitude</column_name>
-        <stream_name>latitude</stream_name>
-      </field>
-      <field>
-        <column_name>longitude</column_name>
-        <stream_name>longitude</stream_name>
-      </field>
-      <field>
         <column_name>housesDamaged</column_name>
         <stream_name>housesDamaged</stream_name>
+      </field>
+      <field>
+        <column_name>housesdamagedamountorder</column_name>
+        <stream_name>housesdamagedamountorder</stream_name>
+      </field>
+      <field>
+        <column_name>housesdamagedamountordertotal</column_name>
+        <stream_name>housesdamagedamountordertotal</stream_name>
       </field>
       <field>
         <column_name>housesDamagedTotal</column_name>
@@ -207,6 +227,14 @@
       <field>
         <column_name>housesDestroyed</column_name>
         <stream_name>housesDestroyed</stream_name>
+      </field>
+      <field>
+        <column_name>housesdestroyedamountorder</column_name>
+        <stream_name>housesdestroyedamountorder</stream_name>
+      </field>
+      <field>
+        <column_name>housesdestroyedamountordertotal</column_name>
+        <stream_name>housesdestroyedamountordertotal</stream_name>
       </field>
       <field>
         <column_name>housesDestroyedTotal</column_name>
@@ -221,12 +249,52 @@
         <stream_name>injuries</stream_name>
       </field>
       <field>
+        <column_name>injuriesamountorder</column_name>
+        <stream_name>injuriesamountorder</stream_name>
+      </field>
+      <field>
+        <column_name>injuriesamountordertotal</column_name>
+        <stream_name>injuriesamountordertotal</stream_name>
+      </field>
+      <field>
         <column_name>injuriesTotal</column_name>
         <stream_name>injuriesTotal</stream_name>
       </field>
       <field>
+        <column_name>latitude</column_name>
+        <stream_name>latitude</stream_name>
+      </field>
+      <field>
         <column_name>locationName</column_name>
         <stream_name>locationName</stream_name>
+      </field>
+      <field>
+        <column_name>year</column_name>
+        <stream_name>year</stream_name>
+      </field>
+      <field>
+        <column_name>month</column_name>
+        <stream_name>month</stream_name>
+      </field>
+      <field>
+        <column_name>day</column_name>
+        <stream_name>day</stream_name>
+      </field>
+      <field>
+        <column_name>hour</column_name>
+        <stream_name>hour</stream_name>
+      </field>
+      <field>
+        <column_name>minute</column_name>
+        <stream_name>minute</stream_name>
+      </field>
+      <field>
+        <column_name>second</column_name>
+        <stream_name>second</stream_name>
+      </field>
+      <field>
+        <column_name>longitude</column_name>
+        <stream_name>longitude</stream_name>
       </field>
       <field>
         <column_name>maxWaterHeight</column_name>
@@ -235,6 +303,14 @@
       <field>
         <column_name>missing</column_name>
         <stream_name>missing</stream_name>
+      </field>
+      <field>
+        <column_name>missingamountorder</column_name>
+        <stream_name>missingamountorder</stream_name>
+      </field>
+      <field>
+        <column_name>missingamountordertotal</column_name>
+        <stream_name>missingamountordertotal</stream_name>
       </field>
       <field>
         <column_name>missingTotal</column_name>
@@ -293,11 +369,14 @@
     <only_when_have_rows>N</only_when_have_rows>
     <partitioning_daily>N</partitioning_daily>
     <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
     <partitioning_monthly>Y</partitioning_monthly>
+    <return_field/>
     <return_keys>N</return_keys>
     <schema>"public"</schema>
     <specify_fields>Y</specify_fields>
     <table>tsunami</table>
+    <tablename_field/>
     <tablename_in_field>N</tablename_in_field>
     <tablename_in_table>Y</tablename_in_table>
     <truncate>Y</truncate>
@@ -339,7 +418,7 @@
     </file>
     <fields>
       <field>
-        <name/>
+        <name>warningStatusId</name>
         <path>$.warningStatusId</path>
         <type>String</type>
         <format/>
